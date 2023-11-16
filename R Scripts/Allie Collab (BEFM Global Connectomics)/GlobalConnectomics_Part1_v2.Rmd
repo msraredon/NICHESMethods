@@ -255,7 +255,7 @@ merge <- merge(epi,list(end,mes,imm))
 ```{r}
 Idents(merge) <- merge$orig.ident
 table(Idents(merge))
-downsampled <- subset(merge,cells = WhichCells(merge,downsample = 1000)) #1K for testing, 5K for publication
+downsampled <- subset(merge,cells = WhichCells(merge,downsample = 5000)) #1K for testing, 5K for publication
 table(Idents(downsampled))
 ```
 
@@ -278,11 +278,11 @@ genes.to.impute <- rownames(downsampled)[rowSums(downsampled@assays$RNA@counts>0
 # impute using ALRA
 options(warn = 1)
 gc()
-# downsampled <- SeuratWrappers::RunALRA(downsampled, genes.use = genes.to.impute) # Hold on knit
+downsampled <- SeuratWrappers::RunALRA(downsampled, genes.use = genes.to.impute) # Hold on knit
 
 # Save imputed data for later
 gc()
-#save(downsampled,file='downsampled.imputed.Robj') # Hold on knit
+save(downsampled,file='downsampled.imputed.Robj') # Hold on knit
 load('downsampled.imputed.Robj')  # Load here from disk on knit
 ```
 
@@ -370,6 +370,6 @@ names(cell.to.system) <- c('RNA','alra')
 # Put all together
 global.connectomics <- list(cell.to.cell,system.to.cell,cell.to.system)
 names(global.connectomics) <- c('CellToCell','SystemToCell','CellToSystem')
-#save(global.connectomics,file = 'global.connectomics.2023-10-27.Robj') # hold for knit
+save(global.connectomics,file = 'global.connectomics.2023-11-11.Robj') # hold for knit
 
 ```
