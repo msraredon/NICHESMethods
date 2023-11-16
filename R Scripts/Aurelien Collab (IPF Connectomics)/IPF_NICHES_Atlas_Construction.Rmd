@@ -1,0 +1,590 @@
+---
+title: "IPF_NICHES_Atlas_Construction"
+author: "MSBR"
+date: "2023-05-26"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+require(Seurat)
+require(NICHES)
+require(SeuratWrappers)
+require(SeuratObject)
+require(ggplot2)
+require(RColorBrewer)
+require(dplyr)
+setwd("/Users/msbr/T5/Kaminski_Lab")
+source('/Users/msbr/GitHub/Engineered-Lung-Analysis/SamCode/General Functions/ArchetypeHeatmap.R')
+set.seed(123)
+```
+
+This is a draft vignette, showing a proposed workflow for applying NICHES to the IPF Atlas.
+
+This document uses a downsampled version of the 2019 IPF Atlas. 
+
+If we like overall approach, we could try scaling-up to the integrated nucSeq & cell data.
+
+## Load Data
+
+```{r eval=TRUE}
+load("~/T5/Kaminski_Lab/control.down.Robj")
+load("~/T5/Kaminski_Lab/ipf.down.Robj")
+```
+
+## Inspect Data
+
+```{r eval=TRUE}
+table(Idents(control.down))
+table(Idents(ipf.down))
+```
+
+## Merge together disease and control and check that idents are set correctly
+
+```{r eval=TRUE}
+merge <- merge(control.down,ipf.down)
+#table(merge$Subject_Identity)
+table(merge$Disease_Identity,merge$Subject_Identity)
+#table(merge$Manuscript_Identity) == table(Idents(merge))
+```
+
+Defining a color scheme for plotting
+
+```{r eval=TRUE}
+# Define colors
+col.pal <- list()
+col.pal$Disease <- c('orange','purple3')
+col.pal$Disease <- c(brewer.pal(6,'Accent')[5:6])
+col.pal$Disease <- c('darkorange','blue3')
+names(col.pal$Disease) <- c('Control','IPF')
+col.pal$Class <- c(brewer.pal(4,'Set1'))
+names(col.pal$Class) <- c('Epithelium','Endothelium','Mesenchyme','Immune')
+col.pal$Type <- c('firebrick','steelblue','springgreen','purple','salmon','skyblue','midnightblue','orangered','violetred',
+                  'tomato','seashell','sandybrown','saddlebrown','royalblue','plum4',
+                  'lightgoldenrod','lawngreen','forestgreen','dimgray','deeppink',
+                  'red2','paleturquoise1','palevioletred','orchid4','seagreen2','plum1','olivedrab2',
+                  'slateblue','mediumvioletred','sienna','orange','seagreen',
+                  'lightseagreen','mediumpurple4','dodgerblue','goldenrod1','grey30','darkred')
+names(col.pal$Type) <- c("Aberrant_Basaloid","ATI","ATII","Basal" ,"Ciliated","Club",  "Goblet","Ionocyte","PNEC",  
+                         "B","B_Plasma","cDC1","cDC2","cMonocyte","DC_Langerhans","DC_Mature","ILC_A","ILC_B",
+                         "Macrophage","Macrophage_Alveolar","Mast","ncMonocyte","NK","pDC","T","T_Cytotoxic","T_Regulatory",
+                         "Fibroblast","Mesothelial","Myofibroblast","Pericyte","SMC",
+                         "Lymphatic","VE_Arterial","VE_Capillary_A","VE_Capillary_B","VE_Peribronchial","VE_Venous")
+
+```
+
+Visualizing the starting atlas:
+
+```{r fig.width=15, fig.height=15}
+# Ipf cell atlas
+merge <- subset(merge, idents='Multiplet',invert=T)
+merge <- ScaleData(merge)
+merge <- FindVariableFeatures(merge)
+merge <- RunPCA(merge)
+#ElbowPlot(merge)
+merge <- RunUMAP(merge,dims = 1:50)
+merge$Manuscript_Identity <- factor(merge$Manuscript_Identity,levels = c("Aberrant_Basaloid","ATI","ATII","Basal" ,"Ciliated","Club",  "Goblet","Ionocyte","PNEC",  
+                                                                         "B","B_Plasma","cDC1","cDC2","cMonocyte","DC_Langerhans","DC_Mature","ILC_A","ILC_B",
+                                                                         "Macrophage","Macrophage_Alveolar","Mast","ncMonocyte","NK","pDC","T","T_Cytotoxic","T_Regulatory",
+                                                                         "Fibroblast","Mesothelial","Myofibroblast","Pericyte","SMC",
+                                                                         "Lymphatic","VE_Arterial","VE_Capillary_A","VE_Capillary_B","VE_Peribronchial","VE_Venous"))
+DimPlot(merge,group.by = 'Manuscript_Identity',cols = col.pal$Type,pt.size = 1,shuffle = T)+ggtitle('IPF Cell Atlas')+
+  theme(plot.title=element_text(hjust=0))+
+  theme(plot.title = element_text(size = 30, face = "bold"))+
+  DarkTheme()+
+  guides(color=guide_legend(ncol =1,override.aes = list(size=5)))+
+  NoAxes()
+```
+
+Now we are ready to compute the NICHES information and begin investigating:
+
+## 1. Split by sample
+
+```{r eval=FALSE}
+split <- SplitObject(merge,split.by = 'Subject_Identity')
+```
+
+## 2. Impute by sample
+
+```{r eval=FALSE}
+options(warn = 1)
+for(i in 1:length(split)){
+  split[[i]] <- RunALRA(split[[i]])
+  gc()
+}
+# Save imputed data
+gc()
+save(split,file='control.ipf.split.imputed.Robj')
+load('control.ipf.split.imputed.Robj')
+```
+
+## 2b. Add Cell Class Metadata
+
+```{r eval=FALSE}
+names(table(Idents(merge)))
+for(i in 1:length(split)){
+Idents(split[[i]]) <- split[[i]]$Manuscript_Identity
+split[[i]] <- RenameIdents(split[[i]],c("Aberrant_Basaloid"='Epithelium',
+                                          "ATI"='Epithelium',
+                                          "ATII"='Epithelium',                 
+                                          "B"='Immune',           
+                                          "B_Plasma"='Immune',         
+                                          "Basal"='Epithelium'  ,              
+                                          "cDC1"='Immune',        
+                                          "cDC2"='Immune',       
+                                          "Ciliated"='Epithelium',           
+                                          "Club"='Epithelium',         
+                                          "cMonocyte"='Immune',    
+                                          "DC_Langerhans"='Immune',   
+                                          "DC_Mature"='Immune',  
+                                          "Fibroblast"='Mesenchyme',     
+                                          "Goblet"='Epithelium',    
+                                          "ILC_A"='Immune',
+                                          "ILC_B"='Immune' ,              
+                                          "Ionocyte"='Epithelium',            
+                                          "Lymphatic"='Endothelium',           
+                                          "Macrophage"='Immune'     ,    
+                                          "Macrophage_Alveolar"='Immune', 
+                                          "Mast"='Immune'           ,
+                                          "Mesothelial"='Mesenchyme' ,          
+                                          "Myofibroblast"='Mesenchyme',      
+                                          "ncMonocyte"='Immune',          
+                                          "NK"='Immune',         
+                                          "pDC"='Immune',        
+                                          "Pericyte"='Mesenchyme' ,           
+                                          "PNEC"='Epithelium',         
+                                          "SMC"='Mesenchyme',         
+                                          "T"='Immune',    
+                                          "T_Cytotoxic"='Immune',   
+                                          "T_Regulatory"='Immune',  
+                                          "VE_Arterial"='Endothelium'   ,     
+                                          "VE_Capillary_A"='Endothelium' ,     
+                                          "VE_Capillary_B"='Endothelium'  ,    
+                                          "VE_Peribronchial"='Endothelium' ,   
+                                          "VE_Venous"='Endothelium'))
+split[[i]]$CellClass <- Idents(split[[i]])
+Idents(split[[i]]) <- split[[i]]$Manuscript_Identity
+}
+names(split[[i]]@meta.data)
+```
+
+## 3. Run NICHES, with all three outputs selected
+
+We compute SystemToCell, CellToSystem, and CellToCell independently. We ask NICHES to use the ALRA-imputed data slot in this instance, and to map against the FANTOM5 database of known logand-receptor interactions. We tell NICHES to sample all cell type crosses based on the "Manuscript_Identity" slot.
+
+```{r eval=FALSE}
+scc.list <- list()
+for(i in 1:length(split)){
+  print(i)
+  scc.list[[i]] <- RunNICHES(split[[i]],
+                             LR.database="fantom5",
+                             species="human",
+                             assay="alra",
+                             cell_types = "Manuscript_Identity",
+                             meta.data.to.map = names(split[[i]]@meta.data),
+                             SystemToCell = T,
+                             CellToCell = T,
+                             CellToSystem=T)
+}
+names(scc.list) <- names(split)     
+```
+
+## 4. Merge outputs together to yield a single object with each NICHES data output type
+
+```{r eval=FALSE}
+temp.list <- list()
+for(i in 1:length(scc.list)){
+  temp.list[[i]] <- scc.list[[i]]$CellToCell # Isolate CellToCell Signaling
+}
+cell.to.cell <- merge(temp.list[[1]],temp.list[2:length(temp.list)])
+cell.to.cell
+```
+
+```{r eval=FALSE}
+temp.list <- list()
+for(i in 1:length(scc.list)){
+  temp.list[[i]] <- scc.list[[i]]$SystemToCell # Isolate SystemToCell Signaling
+}
+system.to.cell <- merge(temp.list[[1]],temp.list[2:length(temp.list)])
+system.to.cell
+```
+
+```{r eval=FALSE}
+temp.list <- list()
+for(i in 1:length(scc.list)){
+  temp.list[[i]] <- scc.list[[i]]$CellToSystem # Isolate CellToSystem Signaling
+}
+cell.to.system <- merge(temp.list[[1]],temp.list[2:length(temp.list)])
+cell.to.system
+save(cell.to.cell,file='cell.to.cell.Robj')
+```
+
+Let's load the CellToCell data output type for further analysis in this vignette, as it tends to be the easiest to interpret:
+
+```{r load from save}
+load('cell.to.cell.Robj')
+cell.to.cell
+```
+
+## 5. Clean NICHES data
+
+This step is essential to getting clean embeddings, clusterings, and downstream data analysis in later steps
+
+```{r fig.width=10, fig.height=6}
+#table(Idents(cell.to.cell))
+#table(Idents(cell.to.cell),cell.to.cell$Subject_Identity.Joint)
+VlnPlot(cell.to.cell,
+        features = 'nFeature_CellToCell',
+        group.by = 'Disease_Identity.Joint',
+        pt.size=0,log = T)
+VlnPlot(cell.to.cell,
+        features = 'nFeature_CellToCell',
+        group.by = 'Subject_Identity.Joint',
+        pt.size=0,log = T)+NoLegend()
+```
+
+From the above, let's set a cutoff saying tht we only want to consider cell-cell crosses with at least 100 unique features (ligand-receptor mechanisms). We are also not interested in Multiplets as either a sending or a receiving cell. Saving this as a temporary file so can load quickly later.
+
+```{r eval=FALSE}
+#table(cell.to.cell$SendingType)
+cell.to.cell <- subset(cell.to.cell,subset=SendingType=='Multiplet',invert=T)
+#table(cell.to.cell$SendingType)
+cell.to.cell <- subset(cell.to.cell,subset=ReceivingType=='Multiplet',invert=T)
+#table(cell.to.cell$ReceivingType)
+temp <- subset(cell.to.cell,nFeature_CellToCell>100) # Choose this limit based on the above violin plots or similar
+temp
+save(temp,file = 'ipf.niches.temp.Robj')
+gc()
+```
+
+```{r eval=TRUE}
+load('ipf.niches.temp.Robj')
+```
+
+```{r}
+VlnPlot(temp,
+        features = 'nFeature_CellToCell',
+        group.by = 'Disease_Identity.Joint',
+        pt.size=0,log = T)
+# VlnPlot(temp,
+#         features = 'nFeature_CellToCell',
+#         group.by = 'Subject_Identity.Joint',
+#         pt.size=0,log = T)+NoLegend()
+```
+
+Now that the data is cleaned (limited to high-information crosses) we are ready to embed, cluster, and visualize our NICHES data so that we may identify data-set relevant patterns of interest:
+        
+## 6. Visualization
+
+Perform PCA
+
+```{r fig.width=8, fig.height=6}
+temp <- ScaleData(temp)
+temp <- FindVariableFeatures(temp)
+temp <- RunPCA(temp,npcs = 100)
+ElbowPlot(temp,ndim=100)
+PCHeatmap(temp,balanced=T,cells=200,dims=1:9)
+PCHeatmap(temp,balanced=T,cells=200,dims=10:18)
+PCHeatmap(temp,balanced=T,cells=200,dims=19:27)
+PCHeatmap(temp,balanced=T,cells=200,dims=28:36)
+
+```
+
+## Visualize a trial embedding:
+
+```{r fig.width=12, fig.height=12}
+temp <- RunUMAP(temp,dims = 1:30)
+DimPlot(temp,raster = FALSE)+NoLegend()
+```
+
+Looks reasonable. Let's look at how the metadata maps within this embedding:
+
+```{r fig.width=12,fig.height=10}
+# Total connectomics
+p1 <- DimPlot(temp,group.by = 'Disease_Identity.Sending',shuffle = T,raster = F,cols = col.pal$Disease)+NoAxes()+ggtitle('Disease Identity')
+p2 <- DimPlot(temp,group.by = 'Subject_Identity.Sending',shuffle = T,raster = F)+NoLegend()+NoAxes()+ggtitle('Subject Identity')
+p3 <- DimPlot(temp,group.by = 'CellClass.Sending',shuffle = T,label = F,raster = F,cols = col.pal$Class)+NoAxes()+ggtitle('Sending Cell Class')
+p4 <- DimPlot(temp,group.by = 'CellClass.Receiving',shuffle = T,label = F,raster = F,cols = col.pal$Class)+NoAxes()+ggtitle('Receiving Cell Class')
+
+cowplot::plot_grid(p1,p2,p3,p4,align = T)
+```
+
+This looks good. Let's break this down into individual class-class crosses and look for cell-cell signaling archetypes that are either enriched or lost in IPF vs. Control.
+
+
+# Epi-Mes
+
+```{r fig.width=10,fig.height=6, message=FALSE}
+epi.mes <- subset(temp,subset=CellClass.Sending=='Epithelium')
+epi.mes <- subset(epi.mes,subset=CellClass.Receiving=='Mesenchyme')
+epi.mes <- subset(epi.mes,subset=CellClass.Sending!='Multiplet') # Just a precaution
+table(epi.mes$CellClass.Joint)
+epi.mes <- ScaleData(epi.mes)
+epi.mes <- FindVariableFeatures(epi.mes)
+epi.mes <- RunPCA(epi.mes)
+ElbowPlot(epi.mes,ndims = 50)
+epi.mes <- RunUMAP(epi.mes,dims = 1:10)
+epi.mes <- FindNeighbors(epi.mes,dims = 1:10)
+epi.mes <- FindClusters(epi.mes,resolution = 0.6)
+p1 <- DimPlot(epi.mes,group.by = 'Disease_Identity.Sending',shuffle = T)
+p2 <- DimPlot(epi.mes,shuffle = T)+ggplot2::ggtitle('Signaling Archetype')
+p3 <- DimPlot(epi.mes,group.by = 'Manuscript_Identity.Sending',shuffle = T)
+p4 <- DimPlot(epi.mes,group.by = 'Manuscript_Identity.Receiving',shuffle = T)
+cowplot::plot_grid(p1,p2,p3,p4)
+```
+
+It looks like cluster 7 is enriched in IPF and is associated with aberrant basaloid cells. Let's see some mechanisms that are associated with this signaling archetype:
+
+```{r fig.width=6,fig.height=6}
+mark.epi.mes <- FindMarkers(epi.mes,ident.1 = '7',only.pos = T)
+mark.epi.mes$ratio <- mark.epi.mes$pct.1/mark.epi.mes$pct.2
+data.table::setorderv(mark.epi.mes,'ratio',order = -1)
+knitr::kable(mark.epi.mes[1:20,])
+```
+
+We can visualize chosen markers within the embedding if we choose, as follows:
+
+```{r fig.width=8,fig.height=4, warning=FALSE}
+p5 <- FeaturePlot(epi.mes,'WNT7A—LRP6',order = T,pt.size = 1,max.cutoff = 6)
+p6 <- FeaturePlot(epi.mes,'PDGFB—PDGFRB',order = T,pt.size = 1,max.cutoff = 6)
+cowplot::plot_grid(p5,p6,nrow=1)
+```
+
+Putting this all together as a small multiple with nice colors:
+
+```{r fig.width=24,fig.height=5, warning=FALSE}
+p1 <- DimPlot(epi.mes,raster = F,pt.size = 1)+ggplot2::ggtitle('Signaling Archetype')+NoAxes()+ theme(legend.position="top")+guides(color=guide_legend(nrow=2,override.aes = list(size=5),byrow=TRUE))+theme(plot.title=element_text(hjust=0))
+p2 <- DimPlot(epi.mes,group.by = 'Disease_Identity.Sending',raster = F,shuffle = T,pt.size = 1,cols = col.pal$Disease)+NoAxes()+ggtitle('Disease Identity')+ theme(legend.position="top")+guides(color=guide_legend(nrow=2,override.aes = list(size=5),byrow=TRUE))+theme(plot.title=element_text(hjust=0))
+p3 <- DimPlot(epi.mes,group.by = 'Manuscript_Identity.Sending',raster = F,pt.size = 1,cols = col.pal$Type)+NoAxes()+ggtitle('Sending Cell Type')+ theme(legend.position="top")+guides(color=guide_legend(nrow=3,override.aes = list(size=5),byrow=TRUE))+theme(plot.title=element_text(hjust=0))
+p4 <- DimPlot(epi.mes,group.by = 'Manuscript_Identity.Receiving',raster = F,pt.size = 1,cols = col.pal$Type)+NoAxes()+ggtitle('Receiving Cell Type')+ theme(legend.position="top")+guides(color=guide_legend(nrow=3,override.aes = list(size=5),byrow=TRUE))+theme(plot.title=element_text(hjust=0))
+p5 <- FeaturePlot(epi.mes,'WNT7A—LRP6',order = T,pt.size = 1,max.cutoff = 6,raster = F)+NoAxes()+ theme(legend.position="top")+theme(plot.title=element_text(hjust=0))
+p6 <- FeaturePlot(epi.mes,'PDGFB—PDGFRB',order = T,pt.size = 1,max.cutoff = 6,raster = F)+NoAxes()+ theme(legend.position="top")+theme(plot.title=element_text(hjust=0))
+
+cowplot::plot_grid(p1,p2,p3,p4,p5,p6,nrow = 1,align = T)
+```
+
+Alternatively, we can create a complex heatmap which shows a great deal of information at once, something like as follows (this uses a custom build 'ArchetypeHeatmap' function which is a NICHES-generalized wrapper for ComplexHeatmap):
+
+```{r message=FALSE,warning=FALSE,fig.width=18,fig.height=12}
+ArchetypeHeatmap(epi.mes,
+                 primary = 'seurat_clusters' ,
+                 secondary = 'Manuscript_Identity.Sending' ,
+                 tertiary = 'Manuscript_Identity.Receiving' ,
+                 quarternary = 'Disease_Identity.Sending' ,
+                 primary.cols = NULL,
+                 secondary.cols = col.pal$Type, # Need to be a named list of colors
+                 tertiary.cols = col.pal$Type,
+                 quarternary.cols = col.pal$Disease,
+                 save.markers = T,
+                 return.markers = T,
+                 MOI.by = 'ratio',
+                 labels = c('Signaling Archetype','Sending Cell Type','Receiving Cell Type','Condition'),
+                 pt.size = 0.5,
+                 return.plot = F,
+                 print.plot = F,
+                 filetag = 'IPF_NICHE_Epi.Mes',
+                 exclude = 'ITGA|ITGB|LRP1') 
+```
+### We can save our work for later as follows:
+
+```{r}
+# save(epi.mes,file = 'epi.mes.Robj')
+# save(mark.epi.mes,file = 'mark.epi.mes.Robj')
+```
+
+Now that we have a standardized workflow, let's turn our attention to the other (15) class-class crosses, each in turn:
+
+# Epi-End
+
+```{r  fig.width=10,fig.height=6, message=FALSE}
+epi.end <- subset(temp,subset=CellClass.Sending=='Epithelium')
+epi.end <- subset(epi.end,subset=CellClass.Receiving=='Endothelium')
+epi.end <- subset(epi.end,subset=CellClass.Sending!='Multiplet')
+table(epi.end$CellClass.Joint)
+epi.end <- ScaleData(epi.end)
+epi.end <- FindVariableFeatures(epi.end)
+epi.end <- RunPCA(epi.end)
+ElbowPlot(epi.end,ndims = 50)
+epi.end <- RunUMAP(epi.end,dims = 1:8)
+epi.end <- FindNeighbors(epi.end,dims = 1:8)
+epi.end <- FindClusters(epi.end,resolution = 0.4)
+p1 <- DimPlot(epi.end,group.by = 'Disease_Identity.Sending')
+p2 <- DimPlot(epi.end)+ggplot2::ggtitle('Signaling Archetype')
+p3 <- DimPlot(epi.end,group.by = 'Manuscript_Identity.Sending')
+p4 <- DimPlot(epi.end,group.by = 'Manuscript_Identity.Receiving')
+cowplot::plot_grid(p1,p2,p3,p4)
+```
+
+It looks like cluster 4 is enriched in IPF. Let's investigate further:
+
+```{r}
+mark.epi.end <- FindMarkers(epi.end,ident.1 = '4',only.pos = T)
+mark.epi.end$ratio <- mark.epi.end$pct.1/mark.epi.end$pct.2
+data.table::setorderv(mark.epi.end,'ratio',order = -1)
+knitr::kable(mark.epi.end[1:20,])
+```
+
+Picking a few markers of interest:
+
+```{r fig.width=6,fig.height=3, warning=FALSE}
+p5 <- FeaturePlot(epi.end,'FGF2—FGFR1',order = T,pt.size = 1,max.cutoff = 6)
+p6 <- FeaturePlot(epi.end,'BMP5—ACVR2A',order = T,pt.size = 1,max.cutoff = 4)
+cowplot::plot_grid(p5,p6)
+```
+
+We can then put all together:
+
+```{r fig.width=24,fig.height=5, warning=FALSE}
+p1 <- DimPlot(epi.end,raster = F,pt.size = 1)+ggplot2::ggtitle('Signaling Archetype')+NoAxes()+ theme(legend.position="top")+guides(color=guide_legend(nrow=2,override.aes = list(size=5),byrow=TRUE))+theme(plot.title=element_text(hjust=0))
+p2 <- DimPlot(epi.end,group.by = 'Disease_Identity.Sending',raster = F,shuffle = T,pt.size = 1,cols = col.pal$Disease)+NoAxes()+ggtitle('Disease Identity')+ theme(legend.position="top")+guides(color=guide_legend(nrow=2,override.aes = list(size=5),byrow=TRUE))+theme(plot.title=element_text(hjust=0))
+p3 <- DimPlot(epi.end,group.by = 'Manuscript_Identity.Sending',raster = F,pt.size = 1,cols = col.pal$Type)+NoAxes()+ggtitle('Sending Cell Type')+ theme(legend.position="top")+guides(color=guide_legend(nrow=3,override.aes = list(size=5),byrow=TRUE))+theme(plot.title=element_text(hjust=0))
+p4 <- DimPlot(epi.end,group.by = 'Manuscript_Identity.Receiving',raster = F,pt.size = 1,cols = col.pal$Type)+NoAxes()+ggtitle('Receiving Cell Type')+ theme(legend.position="top")+guides(color=guide_legend(nrow=3,override.aes = list(size=5),byrow=TRUE))+theme(plot.title=element_text(hjust=0))
+p5 <- FeaturePlot(epi.end,'FGF2—FGFR1',order = T,pt.size = 1,max.cutoff = 6,raster = F)+NoAxes()+ theme(legend.position="top")+theme(plot.title=element_text(hjust=0))
+p6 <- FeaturePlot(epi.end,'BMP5—ACVR2A',order = T,pt.size = 1,max.cutoff = 6,raster = F)+NoAxes()+ theme(legend.position="top")+theme(plot.title=element_text(hjust=0))
+cowplot::plot_grid(p1,p2,p3,p4,p5,p6,nrow = 1,align = T)
+```
+
+Saving our work for later:
+
+```{r}
+save(mark.epi.end,file = 'mark.epi.end.Robj')
+save(epi.end,file = 'epi.end.Robj')
+```
+
+# Epi-Epi
+
+Epithelial autocrine signalinqg:
+
+```{r fig.width=10,fig.height=6, message=FALSE}
+epi.epi <- subset(temp,subset=CellClass.Sending=='Epithelium')
+epi.epi <- subset(epi.epi,subset=CellClass.Receiving=='Epithelium')
+epi.epi <- subset(epi.epi,subset=CellClass.Sending!='Multiplet')
+table(epi.epi$CellClass.Joint)
+epi.epi <- ScaleData(epi.epi)
+epi.epi <- FindVariableFeatures(epi.epi)
+epi.epi <- RunPCA(epi.epi)
+ElbowPlot(epi.epi,ndims = 50)
+epi.epi <- RunUMAP(epi.epi,dims = 1:8)
+epi.epi <- FindNeighbors(epi.epi,dims = 1:8)
+epi.epi <- FindClusters(epi.epi,resolution = 0.4)
+p1 <- DimPlot(epi.epi,group.by = 'Disease_Identity.Sending')
+p2 <- DimPlot(epi.epi)+ggplot2::ggtitle('Signaling Archetype')
+p3 <- DimPlot(epi.epi,group.by = 'Manuscript_Identity.Sending')
+p4 <- DimPlot(epi.epi,group.by = 'Manuscript_Identity.Receiving')
+cowplot::plot_grid(p1,p2,p3,p4)
+```
+
+Epi-epi autocrine marker mechanisms specific to IPF / aberrant basaloids (cluster 2):
+
+```{r}
+mark.epi.epi <- FindMarkers(epi.epi,ident.1 = '2',only.pos = T)
+mark.epi.epi$ratio <- mark.epi.epi$pct.1/mark.epi.epi$pct.2
+data.table::setorderv(mark.epi.epi,'ratio',order = -1)
+knitr::kable(mark.epi.epi[1:20,])
+```
+
+Finding a few autocrine mechanisms of interest that seen disease relevant:
+
+```{r fig.width=6,fig.height=3, warning=FALSE}
+p5 <- FeaturePlot(epi.epi,'WNT7A—FZD5',order = T,pt.size = 1,max.cutoff = 6)
+p6 <- FeaturePlot(epi.epi,'NOV—NOTCH1',order = T,pt.size = 1,max.cutoff = 6)
+cowplot::plot_grid(p5,p6)
+```
+
+Epi-epi small multiple:
+
+```{r fig.width=24,fig.height=5, warning=FALSE}
+p1 <- DimPlot(epi.epi,raster = F,pt.size = 1)+ggplot2::ggtitle('Signaling Archetype')+NoAxes()+ theme(legend.position="top")+guides(color=guide_legend(nrow=2,override.aes = list(size=5),byrow=TRUE))+theme(plot.title=element_text(hjust=0))
+p2 <- DimPlot(epi.epi,group.by = 'Disease_Identity.Sending',raster = F,shuffle = T,pt.size = 1,cols = col.pal$Disease)+NoAxes()+ggtitle('Disease Identity')+ theme(legend.position="top")+guides(color=guide_legend(nrow=2,override.aes = list(size=5),byrow=TRUE))+theme(plot.title=element_text(hjust=0))
+p3 <- DimPlot(epi.epi,group.by = 'Manuscript_Identity.Sending',raster = F,pt.size = 1,cols = col.pal$Type)+NoAxes()+ggtitle('Sending Cell Type')+ theme(legend.position="top")+guides(color=guide_legend(nrow=3,override.aes = list(size=5),byrow=TRUE))+theme(plot.title=element_text(hjust=0))
+p4 <- DimPlot(epi.epi,group.by = 'Manuscript_Identity.Receiving',raster = F,pt.size = 1,cols = col.pal$Type)+NoAxes()+ggtitle('Receiving Cell Type')+ theme(legend.position="top")+guides(color=guide_legend(nrow=3,override.aes = list(size=5),byrow=TRUE))+theme(plot.title=element_text(hjust=0))
+p5 <- FeaturePlot(epi.epi,'WNT7A—FZD5',order = T,pt.size = 1,max.cutoff = 6,raster = F)+NoAxes()+ theme(legend.position="top")+theme(plot.title=element_text(hjust=0))
+p6 <- FeaturePlot(epi.epi,'NOV—NOTCH1',order = T,pt.size = 1,max.cutoff = 6,raster = F)+NoAxes()+ theme(legend.position="top")+theme(plot.title=element_text(hjust=0))
+cowplot::plot_grid(p1,p2,p3,p4,p5,p6,nrow = 1,align = T)
+```
+
+Saving for later:
+
+```{r}
+save(mark.epi.epi,file = 'mark.epi.epi.Robj')
+save(epi.epi,file = 'epi.epi.Robj')
+```
+
+# Epi-Imm
+
+Now let's look at epithelium-immune signaling specifically:
+
+```{r fig.width=12,fig.height=8, message=FALSE}
+epi.imm <- subset(temp,subset=CellClass.Sending=='Epithelium')
+epi.imm <- subset(epi.imm,subset=CellClass.Receiving=='Immune')
+epi.imm <- subset(epi.imm,subset=CellClass.Sending!='Multiplet')
+table(epi.imm$CellClass.Joint)
+epi.imm <- ScaleData(epi.imm)
+epi.imm <- FindVariableFeatures(epi.imm)
+epi.imm <- RunPCA(epi.imm)
+ElbowPlot(epi.imm,ndims = 50)
+epi.imm <- RunUMAP(epi.imm,dims = 1:30)
+epi.imm <- FindNeighbors(epi.imm,dims = 1:30)
+epi.imm <- FindClusters(epi.imm,resolution = 0.4)
+p1 <- DimPlot(epi.imm,group.by = 'Disease_Identity.Sending')
+p2 <- DimPlot(epi.imm)+ggplot2::ggtitle('Signaling Archetype')
+p3 <- DimPlot(epi.imm,group.by = 'Manuscript_Identity.Sending')
+p4 <- DimPlot(epi.imm,group.by = 'Manuscript_Identity.Receiving')
+cowplot::plot_grid(p1,p2,p3,p4)
+```
+
+Let's find some marker for cluster 5 which is driven predominantly by aberrant basaloids:
+
+```{r}
+mark.epi.imm <- FindMarkers(epi.imm,ident.1 = '5',only.pos = T)
+mark.epi.imm$ratio <- mark.epi.imm$pct.1/mark.epi.imm$pct.2
+data.table::setorderv(mark.epi.imm,'ratio',order = -1)
+knitr::kable(mark.epi.imm[1:20,])
+```
+
+A couple mechanisms of interest (TNF-C and TNF-A!)
+
+```{r fig.width=8,fig.height=4, warning=FALSE}
+p5 <- FeaturePlot(epi.imm,'LTB—LTBR',order = T,pt.size = 1,max.cutoff = 30) #TNF-C
+p6 <- FeaturePlot(epi.imm,'TNF—TNFRSF1A',order = T,pt.size = 1,max.cutoff = 15)
+cowplot::plot_grid(p5,p6)
+```
+
+Small multiple:
+
+```{r  fig.width=24,fig.height=5, warning=FALSE}
+# Epi-Imm
+p1 <- DimPlot(epi.imm,raster = F,pt.size = 1)+ggplot2::ggtitle('Signaling Archetype')+NoAxes()+ theme(legend.position="top")+guides(color=guide_legend(nrow=2,override.aes = list(size=5),byrow=TRUE))+theme(plot.title=element_text(hjust=0))
+p2 <- DimPlot(epi.imm,group.by = 'Disease_Identity.Sending',raster = F,shuffle = T,pt.size = 1,cols = col.pal$Disease)+NoAxes()+ggtitle('Disease Identity')+ theme(legend.position="top")+guides(color=guide_legend(nrow=2,override.aes = list(size=5),byrow=TRUE))+theme(plot.title=element_text(hjust=0))
+p3 <- DimPlot(epi.imm,group.by = 'Manuscript_Identity.Sending',raster = F,pt.size = 1,cols = col.pal$Type)+NoAxes()+ggtitle('Sending Cell Type')+ theme(legend.position="top")+guides(color=guide_legend(nrow=3,override.aes = list(size=5),byrow=TRUE))+theme(plot.title=element_text(hjust=0))
+p4 <- DimPlot(epi.imm,group.by = 'Manuscript_Identity.Receiving',raster = F,pt.size = 1,cols = col.pal$Type)+NoAxes()+ggtitle('Receiving Cell Type')+ theme(legend.position="top")+guides(color=guide_legend(nrow=4,override.aes = list(size=5),byrow=TRUE))+theme(plot.title=element_text(hjust=0))+theme(legend.text = element_text(size=8))
+p5 <- FeaturePlot(epi.imm,'LTB—LTBR',order = T,pt.size = 1,max.cutoff = 6,raster = F)+NoAxes()+ theme(legend.position="top")+theme(plot.title=element_text(hjust=0))
+p6 <- FeaturePlot(epi.imm,'TNF—TNFRSF1A',order = T,pt.size = 1,max.cutoff = 6,raster = F)+NoAxes()+ theme(legend.position="top")+theme(plot.title=element_text(hjust=0))
+cowplot::plot_grid(p1,p2,p3,p4,p5,p6,nrow = 1,align = T)
+```
+
+Saving our work for later:
+
+```{r}
+save(mark.epi.imm,file = 'mark.epi.imm.Robj')
+save(epi.imm,file = 'epi.imm.Robj')
+```
+
+We can also go fishing for specific markers. Here are two epithelial-associated cytokines that came up in talks at ATS. We can quickly query these within a given object and ask 'who is listening':
+
+```{r fig.width=24,fig.height=5, warning=FALSE}
+p1 <- DimPlot(epi.imm,raster = F,pt.size = 1)+ggplot2::ggtitle('Signaling Archetype')+NoAxes()+ theme(legend.position="top")+guides(color=guide_legend(nrow=2,override.aes = list(size=5),byrow=TRUE))+theme(plot.title=element_text(hjust=0))
+p2 <- DimPlot(epi.imm,group.by = 'Disease_Identity.Sending',raster = F,shuffle = T,pt.size = 1,cols = col.pal$Disease)+NoAxes()+ggtitle('Disease Identity')+ theme(legend.position="top")+guides(color=guide_legend(nrow=2,override.aes = list(size=5),byrow=TRUE))+theme(plot.title=element_text(hjust=0))
+p3 <- DimPlot(epi.imm,group.by = 'Manuscript_Identity.Sending',raster = F,pt.size = 1,cols = col.pal$Type)+NoAxes()+ggtitle('Sending Cell Type')+ theme(legend.position="top")+guides(color=guide_legend(nrow=3,override.aes = list(size=5),byrow=TRUE))+theme(plot.title=element_text(hjust=0))
+p4 <- DimPlot(epi.imm,group.by = 'Manuscript_Identity.Receiving',raster = F,pt.size = 1,cols = col.pal$Type)+NoAxes()+ggtitle('Receiving Cell Type')+ theme(legend.position="top")+guides(color=guide_legend(nrow=4,override.aes = list(size=5),byrow=TRUE))+theme(plot.title=element_text(hjust=0))+theme(legend.text = element_text(size=8))
+p5 <- FeaturePlot(epi.imm,'IL11—IL6ST',order = T,pt.size = 0.5,max.cutoff = 30,raster = F)+NoAxes()+ theme(legend.position="top")+theme(plot.title=element_text(hjust=0))
+p6 <- FeaturePlot(epi.imm,'CCL2—CCR1',order = T,pt.size = 0.5,max.cutoff = 30,raster = F)+NoAxes()+ theme(legend.position="top")+theme(plot.title=element_text(hjust=0))
+cowplot::plot_grid(p1,p2,p3,p4,p5,p6,nrow = 1,align = T)
+```
+
+## Thoughts?
+
+Do we like this? Does it align well with other work? Suggestions for improvement?
+
