@@ -6,31 +6,38 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE,fig.width = 10,fig.height = 8,warning = FALSE,message = TRUE)
+knitr::opts_chunk$set(echo = TRUE,fig.width = 10,fig.height = 8,warning = FALSE,message = FALSE)
 ```
 
 #### Summary
 
-This markdown document catalogues a process to construct a feature-plot like function for NICHES connectivity data. I use the lung homeostasis data as a demo, but I'm building it primarily to be able to compare experimental conditions and groups. But it is easy to test on this dataset that I know well.
+This markdown document catalogs a process to construct a feature-plot like function for NICHES connectivity data. I've used the lung homeostasis data as a development object, though I'm envisioning this function being used in more advanced projects. But the lung homeostasis dataset is a dataset I know well, so I can assess if the plots make sense.
 
-I've been brainstorming how to do this for a while, but recently discovered that it can be done quite nicely in ggplot. I think that this function, or one like it, will be useful for a lot of differnt projects. We can modify it to suit specific project needs. I'm sharing here so that everyone can give me feedback on the overall 'look' of the function and perhaps make suggestions for improvement or added functionality / flexibility. Also I'm excited about it and want to share!
+I've been brainstorming how to do this for a while, but I recently discovered that it can be done  nicely in ggplot. I think that this function, or one like it, will be useful for a lot of different projects, and we should make sure that it can handle specific project needs. 
+
+I would love feedback on the overall 'look' of the function as it currently stands, and to hear any suggestions for improvement or added functionality / flexibility. Also I'm excited about the plots this function makes and want to share!
 
 #### Introduction 
-Overarching goal: We want to build a tool to visualize signal connectivity between all cells in a dataset, for one specific signaling mechanism.
+Overarching goal: to build a tool to visualize signal connectivity between all cells in a dataset, in that datasets 'home' embedding space, for one specific signaling mechanism.
 
-This would be used in the same way as a feature plot, and have the same xy coordinates as a feature plot, but would have the cells (nodes) all black and the signaling edges colored by intensity.
+This would be used in the same way as a Seurat feature plot, and have the same xy coordinates as a feature plot, but would have the cells (nodes) all black and the signaling connectivity (edges) colored by intensity.
 
-We can do this in ggplot.
+Below details the process to build this in ggplot.
 
 #### Inputs / Output Structure
 
 It needs to be fed as input:
+
 *** Object containing both phenotype data and signaling data
+
 *** Embedding of phenotype latent space
+
 *** User input regarding which edges to plot
+
 *** General color, size, shape, theme, palette, edge thickness, edge alpha, other plotting parameters, etc.
 
 It should provide as output:
+
 *** A ggplot object, which can be modified by ggplot additions
 
 #### Load packages
@@ -111,7 +118,7 @@ Looks great. Next, we need the NICHES data that we would like to plot within thi
 
 #### Load corresponding NICHES data
 
-The NICHES data fror this atlas was omputed earlier and saved. The worflow to reproduce is in a separate vignette, currently saved @ '/Users/msbr/Library/CloudStorage/GoogleDrive-michasam.raredon@yale.edu/My Drive/Tuft_Sox9_Pneumonectomy_Project/Homeostatic_Single_Cell/Figure_3.R')
+The NICHES data for this atlas was computed earlier and saved. The workflow to reproduce is in a separate vignette, currently saved @ '/Users/msbr/Library/CloudStorage/GoogleDrive-michasam.raredon@yale.edu/My Drive/Tuft_Sox9_Pneumonectomy_Project/Homeostatic_Single_Cell/Figure_3.R')
 
 ```{r}
 load('/Users/msbr/Library/CloudStorage/GoogleDrive-michasam.raredon@yale.edu/My Drive/Tuft_Sox9_Pneumonectomy_Project/Homeostatic_Single_Cell/cell.to.cell.Robj')
@@ -413,7 +420,7 @@ We could compute all the different celltype-celltype marker mechanisms at this p
 length(table(Idents(cell.to.cell))) 
 ``` 
 
-distinct VectorTypes we would need to look at. So, let's focus in some way. One way is to consider a single outoing cell type at once:
+distinct VectorTypes we would need to look at. So, let's focus in some way. One way is to consider a single outgoing cell type at once:
 
 ```{r}
 Idents(cell.to.cell.cleaned) <- cell.to.cell.cleaned$SendingType
@@ -443,7 +450,7 @@ network.plot <- NICHES_FeaturePlot(scRNAseq.object = lung.combined,
                    mechanism.of.interest = MOI) + ggtitle(paste(MOI,'Connectivity'))+NoLegend()
 plot_grid(legend.plot,network.plot)
 ```
-Great. But too crowded. Let's increasse the connectivty threshold for plotting.
+Great. But too crowded. Let's increase the connectivity threshold for plotting.
 
 ```{r}
 # Specific for Mac_Alv -> Tuft
