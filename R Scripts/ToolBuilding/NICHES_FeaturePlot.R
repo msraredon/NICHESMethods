@@ -12,6 +12,7 @@ NICHES_FeaturePlot <- function(transcriptome.object, # scRNAseq object containin
                                line.thickness = 0.2,
                                arrowhead.size = 0,
                                connectivity.color.min = 0, # Sets lower bound on the connectivity color range
+                               connectivity.color.max = NULL, # Sets upper bound on the connectivity color range
                                ligand.color.min = 0, # Sets lower bound on the ligand color range
                                receptor.color.min = 0, # Sets lower bound on the receptor color range
                                legend.palettes = NULL, # A named list of named palettes for the legend plots to use. The names must be the same as the elements of legends.to.plot
@@ -110,7 +111,11 @@ NICHES_FeaturePlot <- function(transcriptome.object, # scRNAseq object containin
   downsampled$connectivity.to.plot <- log1p(downsampled$connectivity)
   
   # Set connectivity color range based on the data and/or user input
+  if(!is.null(connectivity.color.min)){
+    connectivity.color.max <- connectivity.color.max 
+  }else{
   connectivity.color.max <- max(downsampled$connectivity.to.plot)
+  }
   if(!is.null(connectivity.color.min)){
     connectivity.color.min <- connectivity.color.min
   }else{

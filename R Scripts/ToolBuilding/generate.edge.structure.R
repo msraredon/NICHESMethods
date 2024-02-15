@@ -1,0 +1,1 @@
+generate.edge.structure <- function(node.structure,edge.info){}
