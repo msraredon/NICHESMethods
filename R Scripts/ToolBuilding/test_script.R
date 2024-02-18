@@ -110,31 +110,76 @@ con.quad <- subset(connectivity,idents = 'Quad')
 feature = 'Vegfa—Kdr'
 feature = 'Tgfb1—Tgfbr1'
 feature = 'Sct—Sctr'
-p4 <- CircuitPlot(transcr.obj = tran.quad,
-            connect.obj = con.quad,
-            feature = feature,
-            group.by = 'class',
-            edge.fixed.size = T,min.edge.value = 0,max.edge.value = 0.5)
-p3 <- CircuitPlot(transcr.obj = tran.tri,
-            connect.obj = con.tri,
-            feature = feature,
-            group.by = 'class',
-            edge.fixed.size = T,min.edge.value = 0,max.edge.value = 0.5)
-p2 <- CircuitPlot(transcr.obj = tran.co,
-            connect.obj = con.co,
-            feature = feature,
-            group.by = 'class',
-            edge.fixed.size = T,min.edge.value = 0,max.edge.value = 0.5)
-p1 <- CircuitPlot(transcr.obj = tran.mono,
-            connect.obj = con.mono,
-            feature = feature,
-            group.by = 'class',
-            edge.fixed.size = T,min.edge.value = 0,max.edge.value = 0.5)
-cowplot::plot_grid(p1,p2,p3,p4,nrow = 1)
+feature = 'Fgf1—Egfr'
 
-# Just BEFM1
-CircuitPlot(transcr.obj = subset(tran.quad,subset = orig.ident =='BEFM1'),
-            connect.obj = subset(con.quad,subset = orig.ident =='BEFM1'),
-            feature = feature,
-            group.by = 'class',
-            edge.fixed.size = T,min.edge.value = 0,max.edge.value = 0.5)
+TempFunc <- function(feature,
+                     max.edge.value = 0.1){
+  p4 <- CircuitPlot(transcr.obj = tran.quad,
+              connect.obj = con.quad,
+              feature = feature,
+              group.by = 'class',
+              edge.fixed.size = T,min.edge.value = 0,max.edge.value = max.edge.value,cols.use = cols.use)
+  p3 <- CircuitPlot(transcr.obj = tran.tri,
+              connect.obj = con.tri,
+              feature = feature,
+              group.by = 'class',
+              edge.fixed.size = T,min.edge.value = 0,max.edge.value = max.edge.value,cols.use = cols.use)
+  p2 <- CircuitPlot(transcr.obj = tran.co,
+              connect.obj = con.co,
+              feature = feature,
+              group.by = 'class',
+              edge.fixed.size = T,min.edge.value = 0,max.edge.value = max.edge.value,cols.use = cols.use)
+  p1 <- CircuitPlot(transcr.obj = tran.mono,
+              connect.obj = con.mono,
+              feature = feature,
+              group.by = 'class',
+              edge.fixed.size = T,min.edge.value = 0,max.edge.value = max.edge.value,cols.use = cols.use)
+  print(cowplot::plot_grid(p1,p2,p3,p4,nrow = 1))
+}
+
+# For allie 2024-02-16
+cols.use <- RColorBrewer::brewer.pal(4,'Set2')
+names(cols.use) <- global.node.list
+scales::show_col(cols.use,ncol=4)
+# create data that references the palette
+colorKey = data.frame(colorName=names(cols.use))
+colorKey$colorName <- factor(colorKey$colorName,levels = global.node.list)
+# plot with ggplot, referencing the palette
+ggplot(data=colorKey, aes(x=1, y = nrow(colorKey):1, fill=colorName, label=colorName)) +
+  geom_tile() +
+  scale_fill_manual(values = cols.use) +
+  theme_void()+
+  theme(legend.position="none") + 
+  geom_text(size = 10)
+
+
+setwd("/Users/msbr/Library/CloudStorage/GoogleDrive-michasam.raredon@yale.edu/.shortcut-targets-by-id/1VLqBlyzO-Qad5O2kbwXkBRh_1cQho39t/Engineered Lung Paper/Global_Connectomics")
+
+# Epi autocrine
+feature.list <- c('Tnf—Tnfrsf1b','Sct—Sctr','Wnt7a—Lrp6',
+                  'Npnt—Itgb1','Ereg—Egfr','Wnt7b—Lrp5',
+                  'Hbegf—Egfr','Lamb3—Itga3','Areg—Egfr')
+max.edge.value.list <- c(0.25,0.05,0.1,
+                         0.1,0.1,0.1,
+                         0.25,1,0.1)
+for(i in 1:length(feature.list)){
+  png(filename = paste(feature.list[i],'.png',sep=''),width = 10,height = 2.5,units = 'in',res=300)
+  TempFunc(feature = feature.list[i],
+           max.edge.value = max.edge.value.list[i])
+  dev.off()
+}
+
+# Mes to Epi
+feature.list <- c('Fgf1—Fgfr3','Fgf1—Egfr','Lama1—Itga2','Csf2—Csf2ra',
+                  'Ngf—Maged1','Wnt16—Fzd6','Fgf7—Fgfr3','Fn1—Itgb6',
+                  'Vegfa—Ephb2','Wnt5a—Lrp5','Col4a1—Itga2','Tnc—Egfr')
+max.edge.value.list <- c(0.05,0.05,0.1,0.25,
+                         0.1,0.1,0.1,0.1,
+                         0.1,0.1,0.1,0.1)
+for(i in 1:length(feature.list)){
+  png(filename = paste(feature.list[i],'.png',sep=''),width = 8,height = 2,units = 'in',res=300)
+  TempFunc(feature = feature.list[i],
+           max.edge.value = max.edge.value.list[i])
+  dev.off()
+}
+

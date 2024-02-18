@@ -14,7 +14,7 @@ CircuitPlot <- function(transcr.obj,
                         cols.use = RColorBrewer::brewer.pal(4,'Set2'),
                         edge.fixed.size = 1,
                         global.node.list = c('Epithelium','Endothelium','Mesenchyme','Immune'),
-                        min.edge.value = NULL,
+                        min.edge.value = 0,
                         max.edge.value = NULL,
                         ...){
   # DefineObjects

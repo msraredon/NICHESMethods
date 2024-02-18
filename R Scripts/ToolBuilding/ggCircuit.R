@@ -288,9 +288,11 @@ ggCircuit <- function(edge.aggregate,
   # Add nodes on top
   circuit.plot <- circuit.plot +
       geom_point(data = node.info,
-             aes(size = system.fraction,
+             aes(size = ifelse(system.fraction==0, NA, system.fraction),
                  color = node.label))+
+      #geom_text(aes(label = node.label),hjust=1, vjust=1,size=2)+
       scale_color_manual(values = cols.use)+
+      scale_size_continuous(range = c(0,4),limits = c(0,1),name = 'System Fraction',trans = 'sqrt')+
     
       theme_classic()+Seurat::NoAxes()+Seurat::NoLegend() +xlim(-1,1)+ylim(-1,1)
 
