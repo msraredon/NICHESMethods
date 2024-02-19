@@ -1,1 +1,0 @@
-generate.node.structure <- function(node.info){}

@@ -1,1 +1,0 @@
-test.transcr.obj <- function(transcr.obj){}

@@ -292,7 +292,7 @@ ggCircuit <- function(edge.aggregate,
                  color = node.label))+
       #geom_text(aes(label = node.label),hjust=1, vjust=1,size=2)+
       scale_color_manual(values = cols.use)+
-      scale_size_continuous(range = c(0,4),limits = c(0,1),name = 'System Fraction',trans = 'sqrt')+
+      scale_size_continuous(range = c(0,6),limits = c(0,1),name = 'System Fraction',trans = 'sqrt')+
     
       theme_classic()+Seurat::NoAxes()+Seurat::NoLegend() +xlim(-1,1)+ylim(-1,1)
 

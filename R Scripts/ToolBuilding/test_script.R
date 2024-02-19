@@ -173,9 +173,9 @@ for(i in 1:length(feature.list)){
 feature.list <- c('Fgf1—Fgfr3','Fgf1—Egfr','Lama1—Itga2','Csf2—Csf2ra',
                   'Ngf—Maged1','Wnt16—Fzd6','Fgf7—Fgfr3','Fn1—Itgb6',
                   'Vegfa—Ephb2','Wnt5a—Lrp5','Col4a1—Itga2','Tnc—Egfr')
-max.edge.value.list <- c(0.05,0.05,0.1,0.25,
-                         0.1,0.1,0.1,0.1,
-                         0.1,0.1,0.1,0.1)
+max.edge.value.list <- c(0.05,0.05,0.5,0.5,
+                         0.1,0.25,0.1,1,
+                         0.5,0.5,0.5,0.1)
 for(i in 1:length(feature.list)){
   png(filename = paste(feature.list[i],'.png',sep=''),width = 8,height = 2,units = 'in',res=300)
   TempFunc(feature = feature.list[i],
