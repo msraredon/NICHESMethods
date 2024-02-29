@@ -16,5 +16,9 @@ AggregateNodeData <- function(node.object,
     rownames(additional.nodes) <- additional.nodes$node.label
     node.aggregate <- rbind(node.aggregate,additional.nodes)
   }
+  
+  # order nodes based on global.node.list
+  node.aggregate <- node.aggregate[global.node.list,]
+  
   return(node.aggregate)
 }

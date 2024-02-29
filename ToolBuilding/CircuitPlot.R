@@ -13,7 +13,7 @@ CircuitPlot <- function(transcr.obj,
                         autocrine.arrow.curvature = 8,
                         cols.use = RColorBrewer::brewer.pal(4,'Set2'),
                         edge.fixed.size = 1,
-                        global.node.list = c('Epithelium','Endothelium','Mesenchyme','Immune'),
+                        global.node.list = c('Endothelium','Epithelium','Mesenchyme','Immune'),
                         min.edge.value = 0,
                         max.edge.value = NULL,
                         ...){

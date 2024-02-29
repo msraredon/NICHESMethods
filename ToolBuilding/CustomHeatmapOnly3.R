@@ -1,16 +1,16 @@
-CustomHeatmap <- function(object,
+CustomHeatmapOnly3 <- function(object,
                           data.type = 'CellToCell',
-                             primary = 'seurat_clusters' ,
-                             secondary = 'SendingType' ,
-                             tertiary = 'ReceivingType' ,
-                             quarternary = 'orig.ident' ,
-                             primary.cols = NULL,
-                             secondary.cols = NULL, # Need to be a named list of colors
-                             tertiary.cols = NULL,
-                             quarternary.cols = NULL,
-                             features = NULL,
-                             labels = c('Signaling Archetype','Sending Cell Type','Receiving Cell Type','Sample'),
-                              selected.row.anotations=NULL,
+                          primary = 'seurat_clusters' ,
+                          secondary = 'SendingType' ,
+                          tertiary = 'ReceivingType' ,
+                          #quarternary = 'orig.ident' ,
+                          primary.cols = NULL,
+                          secondary.cols = NULL, # Need to be a named list of colors
+                          tertiary.cols = NULL,
+                          #quarternary.cols = NULL,
+                          features = NULL,
+                          labels = NULL,
+                          selected.row.anotations=NULL,
                           selected.label.size = 10,
                           use.scale.data = T,
                           range.frac = 1){
@@ -35,10 +35,9 @@ CustomHeatmap <- function(object,
   meta.data <- meta.data[order(
     meta.data[[primary]],
     meta.data[[secondary]], # TEMPORARY EXPERIMENT FOR VISUALS - THIS CONTROLS THE ORDER OF THE BARS
-    meta.data[[tertiary]],
-    meta.data[[quarternary]]),]
+    meta.data[[tertiary]]),]
   if(use.scale.data == T){
-  to.plot <- as.matrix(focus@assays[[data.type]]@scale.data[MOI,meta.data$barcode])
+    to.plot <- as.matrix(focus@assays[[data.type]]@scale.data[MOI,meta.data$barcode])
   }else{
     to.plot <- as.matrix(focus@assays[[data.type]]@data[MOI,meta.data$barcode])
   }
@@ -74,22 +73,22 @@ CustomHeatmap <- function(object,
     tertiary.colors <- tertiary.cols[unique(meta.data[[tertiary]])]
     names(tertiary.colors) <- unique(meta.data[[tertiary]])
   }
-  # 4
-  if(is.null(quarternary.cols)){
-    cols.4 <- RColorBrewer::brewer.pal(n=12,name='Paired')
-    quarternary.colors <- colorRampPalette(cols.4)(length(unique(meta.data[[quarternary]])))
-    names(quarternary.colors) <- unique(meta.data[[quarternary]])
-  }else{
-    quarternary.colors <- quarternary.cols[unique(meta.data[[quarternary]])]
-    names(quarternary.colors) <- unique(meta.data[[quarternary]])
-  }
+  # # 4
+  # if(is.null(quarternary.cols)){
+  #   cols.4 <- RColorBrewer::brewer.pal(n=12,name='Paired')
+  #   quarternary.colors <- colorRampPalette(cols.4)(length(unique(meta.data[[quarternary]])))
+  #   names(quarternary.colors) <- unique(meta.data[[quarternary]])
+  # }else{
+  #   quarternary.colors <- quarternary.cols[unique(meta.data[[quarternary]])]
+  #   names(quarternary.colors) <- unique(meta.data[[quarternary]])
+  # }
   
   # Annotation [HOW DO I GENERALIZE?]
   # Define annotations
   stuff <- data.frame(primary = meta.data[[primary]],
                       secondary = meta.data[[secondary]],
                       tertiary = meta.data[[tertiary]],
-                      quartenary = meta.data[[quarternary]],
+                      #quartenary = meta.data[[quarternary]],
                       check.names = F)
   names(stuff) <- labels
   
@@ -97,8 +96,8 @@ CustomHeatmap <- function(object,
   colors <- list(
     primary = primary.colors,
     secondary = secondary.colors,
-    tertiary = tertiary.colors,
-    quarternary = quarternary.colors)
+    tertiary = tertiary.colors)#,
+    #quarternary = quarternary.colors)
   names(colors) <- labels
   
   column_ha <- ComplexHeatmap::HeatmapAnnotation(
@@ -109,14 +108,15 @@ CustomHeatmap <- function(object,
   # Value colors
   # col_fun = circlize::colorRamp2(c(-2, 0, 2), c("grey", "white", "blue"))
   if(use.scale.data == T){
-    col_fun = circlize::colorRamp2(c(-max(to.plot)*range.frac, 0, max(to.plot)*range.frac), c("grey", "white", "blue"))
+    col_fun = circlize::colorRamp2(c(min(to.plot)*range.frac,0, max(to.plot)*range.frac), c("#440154",'#21918c',"#fde725"))
+    viridis::scale_fill_viridis() 
   }else{
-  col_fun = circlize::colorRamp2(c(0,max(to.plot)*range.frac), c("white","blue"))
+    col_fun = circlize::colorRamp2(c(0,max(to.plot)*range.frac), c("#440154", "#fde725"))
   }
   
   # Legend title
   if(use.scale.data == T){
-  legend.title = 'Connectivity (Scaled)'
+    legend.title = 'Scaled Connectivity'
   }else{
     legend.title = 'Connectivity'
   }
@@ -126,11 +126,11 @@ CustomHeatmap <- function(object,
     #htmp_input <- nlmeganoNA.small@assays$RNA@scale.data[nlmega.markers_res0.8$gene, ] #create matrix for heatmap input
     #ShowGenes <- nlmega.markers_res0.8$gene[c(1, 3, 4, X, etc...)] #select genes that you want to emphasize out of total gene list
     HAleft <- rowAnnotation(foo = anno_mark(at = which(rownames(to.plot) %in% selected.row.anotations), side = 'left',
-                                             labels = rownames(to.plot)[rownames(to.plot) %in% selected.row.anotations],
-                                             labels_gp = gpar(fontsize=selected.label.size)))#,
-                                             # extend = unit(0, "mm"), #not sure if this is bringing anything to the table
-                                             # link_width = unit(5, "mm"), #this actually works and sets the width of the lines
-                                             # link_gp = gpar(lineheight = X))) #not sure if this works, but I tried to set line height like this.. X = multiple of labels font size??
+                                            labels = rownames(to.plot)[rownames(to.plot) %in% selected.row.anotations],
+                                            labels_gp = gpar(fontsize=selected.label.size)))#,
+    # extend = unit(0, "mm"), #not sure if this is bringing anything to the table
+    # link_width = unit(5, "mm"), #this actually works and sets the width of the lines
+    # link_gp = gpar(lineheight = X))) #not sure if this works, but I tried to set line height like this.. X = multiple of labels font size??
     row.names.stash <- row.names(to.plot)
     row.names(to.plot) <- NULL
     # Make heatmap
@@ -151,13 +151,13 @@ CustomHeatmap <- function(object,
                  column_title = NULL,
                  left_annotation = HAleft),
          heatmap_legend_side='right',
-         annotation_legend_side='left')
+         annotation_legend_side='right')
   }else{
     # OR Heatmap with all rows annotated
     draw(Heatmap(to.plot,
                  col = col_fun,
-                use_raster = F,
-                cluster_rows = F,
+                 use_raster = F,
+                 cluster_rows = F,
                  cluster_columns = F,
                  show_column_dend = F,
                  show_row_dend = F,
@@ -169,12 +169,9 @@ CustomHeatmap <- function(object,
                  heatmap_legend_param = list(title_position = 'leftcenter-rot'),
                  row_title = 'Signaling Mechanisms',
                  column_title = NULL),
-                heatmap_legend_side='right',
-                annotation_legend_side='left')
+         heatmap_legend_side='right',
+         annotation_legend_side='right')
   }
-
   
-  }
-                                 
-                                 
-                                 
+  
+}

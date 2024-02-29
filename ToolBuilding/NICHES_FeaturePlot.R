@@ -16,7 +16,8 @@ NICHES_FeaturePlot <- function(transcriptome.object, # scRNAseq object containin
                                ligand.color.min = 0, # Sets lower bound on the ligand color range
                                receptor.color.min = 0, # Sets lower bound on the receptor color range
                                legend.palettes = NULL, # A named list of named palettes for the legend plots to use. The names must be the same as the elements of legends.to.plot
-                               legend.alpha = 0.25 # Alpha for legend coloring
+                               legend.alpha = 0.25, # Alpha for legend coloring
+                               black.points = T
                                ){
   #### SETUP ####
   # Break mechanism of interest into ligand and receptor
@@ -97,10 +98,10 @@ NICHES_FeaturePlot <- function(transcriptome.object, # scRNAseq object containin
   message('Computing starting and ending points for each edge...')
   sending.barcode.umap.coords <- data.frame(transcriptome.information[connectome.information$SendingBarcode,])
   receiving.barcode.umap.coords <- data.frame(transcriptome.information[connectome.information$ReceivingBarcode,])
-  connectome.information$sending.barcode.umap1 <- sending.barcode.umap.coords$UMAP_1
-  connectome.information$sending.barcode.umap2 <- sending.barcode.umap.coords$UMAP_2
-  connectome.information$receiving.barcode.umap1 <- receiving.barcode.umap.coords$UMAP_1
-  connectome.information$receiving.barcode.umap2 <- receiving.barcode.umap.coords$UMAP_2
+  connectome.information$sending.barcode.umap1 <- sending.barcode.umap.coords$umap_1
+  connectome.information$sending.barcode.umap2 <- sending.barcode.umap.coords$umap_2
+  connectome.information$receiving.barcode.umap1 <- receiving.barcode.umap.coords$umap_1
+  connectome.information$receiving.barcode.umap2 <- receiving.barcode.umap.coords$umap_2
 
   # Threshold edges
   message('Will only plot edges with >',min.connectivity.thresh,' connectivity, per user input...')
@@ -144,7 +145,7 @@ NICHES_FeaturePlot <- function(transcriptome.object, # scRNAseq object containin
     # Base plot
     message('Plotting base plot...')
     base.plot <- ggplot(data.frame(transcriptome.information),
-                   aes(x=UMAP_1,y=UMAP_2))+
+                   aes(x=umap_1,y=umap_2))+
       theme_classic()
     
   #### SPLIT.BY == NULL ####
@@ -155,7 +156,7 @@ NICHES_FeaturePlot <- function(transcriptome.object, # scRNAseq object containin
     connectivity.plot <- base.plot +
       geom_point(size=point.size,alpha=0.1,color='grey')+ # put a light-grey point base layer down first
       scale_alpha_continuous(range=c(alpha.min,alpha.max),limits=c(connectivity.color.min,connectivity.color.max),name='Connectivity')+ # sets the alpha range for the segments
-      scale_colour_gradientn(colours = c('#4C1E4F','#348AA7','#FAA916','#EF233C'),limits=c(connectivity.color.min,connectivity.color.max),name='Connectivity')+ 
+      scale_colour_gradientn(colours = c('#440154','#21918c','#fde725'),limits=c(connectivity.color.min,connectivity.color.max),name='Connectivity')+ 
       geom_segment(data = downsampled[sample(rownames(downsampled),size=nrow(downsampled)),], # randomizes the segment plotting order
                    aes(x = sending.barcode.umap1, 
                        y = sending.barcode.umap2, 
@@ -172,10 +173,15 @@ NICHES_FeaturePlot <- function(transcriptome.object, # scRNAseq object containin
     
     # Transcriptomic plot
     message('Plotting transcriptome information...')
-
+    
+    # define ligand and receptor information
+    receptor.info.to.plot <- transcriptome.information[downsampled$ReceivingBarcode,] # not sure why this sometimes has NA in it?
+    ligand.info.to.plot <- transcriptome.information[downsampled$SendingBarcode,] # not sure why this sometimes has NA in it?
+    
+    # plot colored points
+   
       # Add receptor expressivity
-      receptor.info.to.plot <- transcriptome.information[downsampled$ReceivingBarcode,] # not sure why this sometimes has NA in it?
-      
+
       output.plot <- connectivity.plot + 
         ggnewscale::new_scale_color() +
         scale_colour_gradientn(colours = c('#FF000000','#FF000050'),limits=c(receptor.color.min,receptor.color.max),name = "Receptor Expression")+
@@ -185,8 +191,7 @@ NICHES_FeaturePlot <- function(transcriptome.object, # scRNAseq object containin
                    size = point.size)
   
       # Add ligand expressivity
-      ligand.info.to.plot <- transcriptome.information[downsampled$SendingBarcode,] # not sure why this sometimes has NA in it?
-      
+
       output.plot <- output.plot + 
         ggnewscale::new_scale_color() +
         scale_colour_gradientn(colours = c('#0000FF00','#0000FF50'),limits=c(ligand.color.min,ligand.color.max),name = "Ligand Expression")+
@@ -194,6 +199,14 @@ NICHES_FeaturePlot <- function(transcriptome.object, # scRNAseq object containin
                    aes(color = ligand.info.to.plot$ligand.info),#,
                        #alpha = ligand.info.to.plot$ligand.info),
                    size = point.size)
+      
+      # if black points ==T
+      if(black.points==T){
+        output.plot <- output.plot + 
+          geom_point(data=transcriptome.object,
+                     size = point.size)# use aes_() here
+      }
+      
       # Add connectivity plot title
       output.plot <- output.plot+ ggtitle(paste(mechanism.of.interest,'Connectivity'))+NoLegend()
 
@@ -273,7 +286,7 @@ NICHES_FeaturePlot <- function(transcriptome.object, # scRNAseq object containin
       connectivity.plot <- base.plot +
         geom_point(size=point.size,alpha=0.1,color='grey')+ # put a light-grey point base layer down first
         scale_alpha_continuous(range=c(alpha.min,alpha.max),limits=c(connectivity.color.min,connectivity.color.max),name='Connectivity')+ # sets the alpha range for the segments
-        scale_colour_gradientn(colours = c('#4C1E4F','#348AA7','#FAA916','#EF233C'),limits=c(connectivity.color.min,connectivity.color.max),name='Connectivity')+ 
+        scale_colour_gradientn(colours = c('#440154','#21918c','#fde725'),limits=c(connectivity.color.min,connectivity.color.max),name='Connectivity')+ 
         geom_segment(data = downsampled.list[[i]][sample(rownames(downsampled.list[[i]]),size=nrow(downsampled.list[[i]])),], # randomizes the segment plotting order
                      aes(x = sending.barcode.umap1, 
                          y = sending.barcode.umap2, 
@@ -288,9 +301,14 @@ NICHES_FeaturePlot <- function(transcriptome.object, # scRNAseq object containin
                        ends = 'last',
                        type = 'closed'))
       
-      # Add receptor expressivity
+      # Define ligand and receptor info
       receptor.info.to.plot <- transcriptomic.list[[i]][downsampled.list[[i]]$ReceivingBarcode,] # not sure why this sometimes has NA in it?
+      ligand.info.to.plot <- transcriptomic.list[[i]][downsampled.list[[i]]$SendingBarcode,] # not sure why this sometimes has NA in it?
       
+      # Plot black points or colored points
+      
+      
+      # Add receptor expressivity
       output.plot <- connectivity.plot + 
         ggnewscale::new_scale_color() +
         scale_colour_gradientn(colours = c('#FF000000','#FF000050'),limits=c(receptor.color.min,receptor.color.max),name = "Receptor Expression")+
@@ -300,8 +318,6 @@ NICHES_FeaturePlot <- function(transcriptome.object, # scRNAseq object containin
                    size = point.size)
       
       # Add ligand expressivity
-      ligand.info.to.plot <- transcriptomic.list[[i]][downsampled.list[[i]]$SendingBarcode,] # not sure why this sometimes has NA in it?
-
       output.plot <- output.plot + 
         ggnewscale::new_scale_color() +
         scale_colour_gradientn(colours = c('#0000FF00','#0000FF50'),limits=c(ligand.color.min,ligand.color.max),name = "Ligand Expression")+
@@ -309,6 +325,14 @@ NICHES_FeaturePlot <- function(transcriptome.object, # scRNAseq object containin
                    aes(color = ligand.info.to.plot$ligand.info),#,
                    #alpha = ligand.info.to.plot$ligand.info),
                    size = point.size)
+      
+      # if black points ==T
+      if(black.points==T){
+        output.plot <- output.plot + 
+          geom_point(data=transcriptomic.list[[i]],
+                      size = point.size)# use aes_() here
+      }
+      
       # Add connectivity plot title
       output.plot <- output.plot+ ggtitle(paste(mechanism.of.interest,'Connectivity'))+NoLegend()
       

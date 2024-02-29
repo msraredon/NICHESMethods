@@ -12,14 +12,20 @@ ggCircuit <- function(edge.aggregate,
                         edge.fixed.size,
                         split.by = FALSE,
                         min.edge.value = NULL,
-                        max.edge.value = NULL
+                        max.edge.value = NULL,
+                        fixed.node.list = NULL#c('Epithelium','Endothelium','Mesenchyme','Immune')
                         ){
   
   # Define node info and add coordinates for nodes centered around origin
+  if(!is.null(fixed.node.list)){
+    node.info <- cbind(node.aggregate,
+                       netCoin::layoutCircle(data.frame(fixed.node.list),
+                                             deg=graph.angle))
+  }else{
   node.info <- cbind(node.aggregate,
                  netCoin::layoutCircle(data.frame(node.aggregate$node.label),
                                        deg=graph.angle))
-  
+  }
   # Define edge info and add start and end coordinates for each edge
   edge.info <- edge.aggregate
   edge.info$x.start <- node.info[edge.info$sending.label,]$x
