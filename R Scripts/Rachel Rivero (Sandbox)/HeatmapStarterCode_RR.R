@@ -8,7 +8,7 @@ require(Seurat)
 require(dplyr)
 
 # Load local functions (change filepath to wherever you have saved 'CustomHeatmapOnly3.R'on your computer)
-source('/Users/rr792/Documents/GitHub/NICHESMethods/R Scripts/Rachel Rivero (Sandbox)/CustomHeatmapOnly3_Phenotype.R')
+source('/Users/rr792/Documents/GitHub/NICHESMethods/R Scripts/Rachel Rivero (Sandbox)/CustomHeatmapOnly3_RRedits.R')
 
 # Load data
 load("/Volumes/Rachel Rivero/Manuscript Worthy/E17/E17_labeled.Robj")
@@ -23,33 +23,40 @@ table(FRL17.Seurat$CellType,
 # Re-order the metadata for plotting, if desired (optional)
 FRL17.Seurat$CellClass <- factor(FRL17.Seurat$CellClass,
                                  levels=c('Mesenchymal','Epithelial','Immune','Endothelial')) # feel free to modify the order here
-# FRL17.Seurat$CellType <- factor(FRL17.Seurat$CellType,
-#                                 levels=c('Epithelial','Endothelial','LEC',
-#                                         'Mesothelial','Pericytes','Mesenchyme','Proliferating Mesenchyme','Myofibroblasts/SMCs','Mesenchymal Progenitors','NCC',
-#                                          'Immune')) # feel free to modify the order here
+FRL17.Seurat$CellType <- factor(FRL17.Seurat$CellType,
+                                levels=c('Prex2+ Mes', 'Il17+ SMCs/Myofibroblasts', 'Wnt2+ Mes', 
+                                         'Mesothelium', 'Pericytes 1','Pericytes 2', 'Proliferating Wnt2+ Mes',
+                                         'Sox9- Mesenchymal Progenitors', 'Sox9+ Mesenchymal Progenitors',
+                                         'NCCs', 'NECs','SMCs/Myofibroblasts',
+                                         'Club cells','Early AT2', 'Transitional Epithelium', 'Non-ciliated Secretory',
+                                         'APCs','Immune',     
+                                         'Arterial', 'LEC','Transitional Endothelial')) # feel free to modify the order here
 
 # Look at the effect of re-ordering
 table(FRL17.Seurat$CellType,
       FRL17.Seurat$CellClass)
 
-# Set up color palette for all your plotting (customize for a given paper/project)
-col.pal <- list()
-col.pal$CellType <- c('firebrick2','mediumseagreen','#B0DB43','#9C528B', 'slategray1','#2F6690',
-                                  '#F1C40F','#0F0326','#E65F5C','#14591D','#726DA8',
-                                  'cornsilk3', 'blue', 'deepskyblue',
-                                  'darkorange1', 'cyan', 'purple', 'yellow', 'deeppink', '#A40606','pink')
-col.pal$Condition <- c('#F1C40F', '#2F6690') 
-col.pal$Sample <- c('orange','purple','yellow','black') 
-names(col.pal$CellType) <- c('Club cells','Early AT2','Il17+ SMCs/Myofibroblasts',
-                             'Mesothelium', 'Pericytes 2', 'Proliferating Wnt2+ Mes',
-                             'Sox9- Mesenchymal Progenitors', 'Sox9+ Mesenchymal Progenitors',
-                             'Transitional Epithelium', 'Wnt2+ Mes', 'Arterial', 'APCs',
-                             'Pericytes 1', 'Immune', 'LEC', 'NCCs', 'NECs', 'Non-ciliated Secretory',
-                             'SMCs/Myofibroblasts', 'Transitional Endothelial')
-names(col.pal$Condition) <- c('CDH','Normal') #must be named correctly
-names(col.pal$Sample) <- c('cdhfrl1','cdhfrl2','frl1','frl2') #must be named correctly
+# Load color palette
+load("/Volumes/Rachel Rivero/Manuscript Worthy/E17/figures/E17colorpalette.Robj")
 
-save(col.pal, file = 'colorpalette.Robj')
+# # Set up color palette for all your plotting (customize for a given paper/project)
+# col.pal <- list()
+# col.pal$CellType <- c('firebrick2','mediumseagreen','#B0DB43','#9C528B', 'slategray1','#2F6690',
+#                                   '#F1C40F','#0F0326','#E65F5C','#14591D','#726DA8',
+#                                   'cornsilk3', 'blue', 'deepskyblue',
+#                                   'darkorange1', 'cyan', 'purple', 'yellow', 'deeppink', '#A40606','pink')
+# col.pal$Condition <- c('#F1C40F', '#2F6690') 
+# #col.pal$Sample <- c('orange','purple','yellow','black') 
+# names(col.pal$CellType) <- c('Club cells','Early AT2','Il17+ SMCs/Myofibroblasts',
+#                              'Mesothelium', 'Pericytes 2', 'Proliferating Wnt2+ Mes',
+#                              'Sox9- Mesenchymal Progenitors', 'Sox9+ Mesenchymal Progenitors',
+#                              'Transitional Epithelium', 'Wnt2+ Mes', 'Arterial', 'APCs',
+#                              'Pericytes 1', 'Immune', 'LEC', 'NCCs', 'NECs', 'Non-ciliated Secretory',
+#                              'SMCs/Myofibroblasts', 'Transitional Endothelial', 'Prex2+ Mes')
+# names(col.pal$Condition) <- c('CDH','Normal') #must be named correctly
+# #names(col.pal$Sample) <- c('cdhfrl1','cdhfrl2','frl1','frl2') #must be named correctly
+# 
+# save(col.pal, file = 'colorpalette.Robj')
 
 # Create a downsampled object (optional, can be useful both for speed and also to make plot clearer)
 table(FRL17.Seurat$Condition)
@@ -83,16 +90,16 @@ row.labels <- c('Sox9','Sox10','Gucy1a2','Sox7','Mmrn1','Sox17','Wt1','Ptprc','P
 png(file = 'Heatmap_Demo_Output.png', width=8, height=6,units = 'in',res=300)
 CustomHeatmapOnly3(object = downsampled,
                    data.type = 'RNA', # sets the assay to pull data from
-                   primary = 'CellType' , # sets the first metadata slot to use (primary column grouping)
-                   secondary = 'Condition' , # sets the second metadata slot to use (secondary column grouping)
-                   tertiary = 'Sample' , # sets the third metadata slot to use (tertiary column grouping)
-                   #quarternary = 'orig.ident' , # not used in this specific function
-                   primary.cols = col.pal$CellType, # Needs to be a named list of colors
-                   secondary.cols = col.pal$Condition, # Needs to be a named list of colors
-                   tertiary.cols = col.pal$Sample, # Needs to be a named list of colors
-                   #quarternary.cols = NULL, # not used in this specific function
+                   primary = 'CellClass' , # sets the first metadata slot to use (primary column grouping)
+                   secondary = 'CellType' , # sets the second metadata slot to use (secondary column grouping)
+                   tertiary = 'Condition' , # sets the third metadata slot to use (tertiary column grouping)
+                   quarternary = 'Sample' , 
+                   primary.cols = col.pal$CellClass, # Needs to be a named list of colors, defaulted
+                   secondary.cols = col.pal$CellType, # Needs to be a named list of colors
+                   tertiary.cols = col.pal$Condition, # Needs to be a named list of colors
+                   quarternary.cols = col.pal$Sample, # not used in this specific function
                    features = GOI, # defined above, customize
-                   labels = c('CellType','Condition','Sample'), # Needs to ordered IDENTICALLY to primary, secondary, tertiary, above, or will produce inaccurately labeled plot
+                   labels = c('CellClass','CellType','Condition', 'Sample'), # Needs to ordered IDENTICALLY to primary, secondary, tertiary, above, or will produce inaccurately labeled plot
                    selected.row.anotations=row.labels,
                    selected.label.size = 10,
                    use.scale.data = T,
