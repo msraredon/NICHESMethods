@@ -17,6 +17,8 @@
 
     # Rule 1: MECHANISM is the feature label itself
     ## Performed above, upon feature.metadata initialization
+    
+    ## here is a change
 
     # Rule 2: LIGAND and RECEPTOR definition via special separating character
     feature.metadata$LIGAND <- data.frame(stringr::str_split_fixed(feature.metadata$MECHANISM, 
