@@ -1,0 +1,249 @@
+---
+title: "Running NICHES on x1 spatial sample BRAIN 2"
+author: "MSBR"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      fig.width = 20,
+                      fig.height = 10,
+                      warning = FALSE,
+                      message = FALSE)
+```
+
+## Introduction
+
+This vignette shows how to run NICHES on a single spatial transcriptomics sample.
+
+## Load Packages
+
+```{r}
+require(NICHES)
+require(Seurat)
+require(SeuratData)
+require(ggplot2)
+```
+
+## Load Data
+
+```{r}
+SeuratData::InstallData("stxBrain")
+brain2 <- SeuratData::LoadData("stxBrain", type = "posterior1")
+brain2
+```
+
+## Counts
+
+The counts slot in Seurat objects contains the raw data, expressed as molecules per spot. We can visualize the total number of counts in each spot like this:
+
+```{r}
+SpatialFeaturePlot(brain2, features = "nCount_Spatial")
+```
+
+Each individual count is labeled as a specific gene. This means that we can also visualize the number of genes per spot. Note that nFeatures will always be equal to or lower than the number of counts per spot:
+
+```{r}
+SpatialFeaturePlot(brain2, features = "nFeature_Spatial")
+```
+
+Note that both nCounts_Spatial and nFeatures_Spatial show a pretty high degree of structure already. This is a beautiful demonstration that certain sub-regions of tissue have greater or fewer captured molecules.
+
+The pattern above is biologic in origin and represents macroscopic brain structure, ventircles, and connective tissue. Spots with lower nCounts_Spatial means that fewer total RNA molecules were captured from those spots. As a general rule, nCounts will correlate with nFeatures:
+
+```{r}
+FeatureScatter(brain2,
+               feature1 = 'nCount_Spatial',
+               feature2 = 'nFeature_Spatial')
+```
+
+
+We can also look at single, gene-level count matrix for a specific gene:
+
+```{r}
+SpatialFeaturePlot(brain2, features = "Fgf1",slot = 'counts')
+```
+
+## Normalize Data
+
+Next, we will normalize the data. Data normalization is necessary to convert the above counts data to a relative measure. Essentially, we are creating a data slot that answers the question
+
+"What fraction of the transcriptome is devoted to each gene?"
+
+NICHES currently takes this type of normalized data as input.
+
+There are many different and evolving ways to normalize barcoded transcriptomic data. This is a separate topic unto itself and will not be covered here.
+
+Here, we use log-normalization with a scaling factor. This method is super common and fundamentally problematic in certain instances, but it is sufficient for many purposes and will suffice for now.
+
+```{r}
+brain2 <- Seurat::NormalizeData(brain2)
+```
+When we inspect the new normalized slot, we can see that the scale has changed and is no longer an integer value.
+
+```{r}
+SpatialFeaturePlot(brain2, features = "Fgf1",slot = 'data')
+```
+
+Next, we usually impute the data. 
+
+While imputation is not strictly necessary for NICHES to run, using imputed data as input can help to resolve subtle patterns in the data that are otherwise quite noisy and might be missed. 
+
+We often run NICHES on both the normalized and imputed data slot in parallel, so that we may compare downstream outputs and decide which we prefer.
+
+Note that if you are processing multiple samples, they should generally be imputed as a set. Please see our other vignette, "Creating NICHES data from multiple spatial samples" as appropriate.
+
+## Impute
+
+```{r}
+# Pick which genes to impute
+num.cells.per.feature <- 25 # this reduces ALRA false-positives, but it is not a perfect approach
+genes.to.impute <- rownames(brain2)[rowSums(brain2@assays$Spatial@counts>0)>num.cells.per.feature]
+
+# Run imputation only on selected genes
+brain2 <- SeuratWrappers::RunALRA(brain2)
+```
+
+Now, when we inspect the object, there is a new assay ('alra'), which is set as the default.
+
+```{r}
+brain2
+```
+
+## Define spatial coordinates in the metadata
+
+For spatial data analysis, NICHES relies on x-y euclidean coordinates. Coordinate values must be within the object metadata for NICHES to run. 
+
+This step is project specific. We do this here as follows:
+
+```{r}
+brain2@meta.data$x <- brain2@images$posterior1@coordinates$row
+brain2@meta.data$y <- brain2@images$posterior1@coordinates$col
+```
+
+## RunNICHES
+
+We are now ready to actually process the data using NICHES.
+
+We will do this twice: once on the normalized data, and once on the imputed data. We do this so that we can compare results downstream, which helps us to understand and feel confident in our results later.
+
+We need to tell NICHES what species our data is (mouse), what ground-truth list of ligand-receptor mechanisms we would like to use ('fantom5'), and which outputs we would like to compute (NeighborhoodToCell).
+
+First, we run on the 'alra' slot:
+
+```{r}
+NICHES_alra <- RunNICHES(object = brain2,
+                           LR.database = "fantom5",
+                           species = "mouse",
+                           assay = "alra", # Here we use the ALRA dataslot
+                           position.x = 'x',
+                           position.y = 'y',
+                           k = 7, # this parameter is users-choice and has a variety of options. It will affect the shape of the output. We choose 7 here to tell NICHES: "Consider the 7 nearest neighbors around each spot, and take the mean of the incoming edges within that neighboorhood for each feature, for each coordinate" 
+                           cell_types = "seurat_clusters", # for spatial data, this parameter is irrelevant and will not affect outputs. For non-spatial data, it is critical and defines the edge downsampling algorithm.
+                           min.cells.per.ident = 0,
+                           min.cells.per.gene = NULL,
+                           meta.data.to.map = names(brain2@meta.data), # this maps over all meta.data
+                           CellToCell = F,CellToSystem = F,SystemToCell = F,
+                           CellToCellSpatial = F,CellToNeighborhood = F,NeighborhoodToCell = T) # We will solely compute NeighborhoodToCell, for this vignette.
+```
+
+And then we run on the normalized 'data' slot:
+
+```{r}
+NICHES_norm <- RunNICHES(object = brain2,
+                           LR.database = "fantom5",
+                           species = "mouse",
+                           assay = "Spatial", # Here we use the standard normalized 'data'
+                           position.x = 'x',
+                           position.y = 'y',
+                           k = 7, # this parameter is users-choice and has a variety of options. It will affect the shape of the output. We choose 7 here to tell NICHES: "Consider the 7 nearest neighbors around each spot, and take the mean of the incoming edges within that neighboorhood for each feature, for each coordinate" 
+                           cell_types = "seurat_clusters", # for spatial data, this parameter is irrelevant and will not affect outputs. For non-spatial data, it is critical and defines the edge downsampling algorithm.
+                           min.cells.per.ident = 0,
+                           min.cells.per.gene = NULL,
+                           meta.data.to.map = names(brain2@meta.data), # this maps over all meta.data
+                           CellToCell = F,CellToSystem = F,SystemToCell = F,
+                           CellToCellSpatial = F,CellToNeighborhood = F,NeighborhoodToCell = T) # We will solely compute NeighborhoodToCell, for this vignette.
+```
+
+NICHES outputs lists of data objects, in case a user would like to compute multiple styles of output at once. 
+
+It can be useful to extract the specific data objects:
+
+```{r}
+niches.data <- list()
+niches.data$alra <- NICHES_alra$NeighborhoodToCell
+niches.data$norm <- NICHES_norm$NeighborhoodToCell
+niches.data
+```
+
+Note that there is only one data slot present in these NICHES connectivity objects - 'counts'. Important to recognize that the actual values in this matrix are not really counts. The values are the result of multiplying ligand expression by the sending cell and receptor expression by the receiving cell. This is a proxy that we will call 'connectivity', and can be thought of as representing how likley it is that a given pair of cells will communicate in a given way.
+
+Note also that we generally do not normalize connectivity values. This is because we usually want to study raw cell-to-cell connectivity values across a tissue, rather than a relative metric showing how strong one signal is locally compared to others.
+
+Also, we've already essentially done the appropriate transformation, because we used normalized values as the input.
+
+But, since it's weird to have the data slot empty, we can do this:
+
+```{r}
+niches.data$alra@assays$NeighborhoodToCell@layers$data <- niches.data$alra@assays$NeighborhoodToCell@layers$counts
+niches.data$norm@assays$NeighborhoodToCell@layers$data <- niches.data$norm@assays$NeighborhoodToCell@layers$counts
+```
+
+## Add NICHES data as additional assay(s)
+
+If the NICHES objects have the same barcodes as the transcriptomic object, we can combine these objects together. 
+
+For NeighborhoodToCell, this works and yields super cool results:
+
+```{r}
+# Pull the data
+alra.data <- GetAssayData(object =  niches.data$alra, slot = 'counts')
+norm.data <- GetAssayData(object =  niches.data$norm, slot = 'counts')
+
+# Update the colnames to equal the receiving cell barcode
+colnames(alra.data) <- niches.data$alra@meta.data$ReceivingCell
+colnames(norm.data) <- niches.data$norm@meta.data$ReceivingCell
+
+# Add additional assays
+brain2[["NeighborhoodToCell_ALRA"]] <- CreateAssayObject(data = alra.data)
+brain2[["NeighborhoodToCell_Norm"]] <- CreateAssayObject(data = alra.data)
+
+# Add additional metadata
+brain2 <- AddMetaData(brain2,metadata = niches.data$alra@meta.data$nCount_NeighborhoodToCell,col.name = 'nCount_NeighborhoodToCell_ALRA')
+brain2 <- AddMetaData(brain2,metadata = niches.data$alra@meta.data$nFeature_NeighborhoodToCell,col.name = 'nFeature_NeighborhoodToCell_ALRA')
+brain2 <- AddMetaData(brain2,metadata = niches.data$norm@meta.data$nCount_NeighborhoodToCell,col.name = 'nCount_NeighborhoodToCell_Norm')
+brain2 <- AddMetaData(brain2,metadata = niches.data$norm@meta.data$nFeature_NeighborhoodToCell,col.name = 'nFeature_NeighborhoodToCell_Norm')
+
+# Inspect
+brain2
+```
+
+Great. We have all our information in one place for downstream analysis.
+
+Let's briefly inspect our data to confirm we did a good job:
+
+```{r}
+p1 <- VlnPlot(brain2,'nCount_Spatial')+scale_y_continuous(trans = 'log10',limits = c(1,40000))
+p2 <- VlnPlot(brain2,'nFeature_Spatial')+scale_y_continuous(trans = 'log10',limits = c(1,40000))
+p3 <- VlnPlot(brain2,'nFeature_NeighborhoodToCell_Norm')+ylim(0,1000)
+p4 <- VlnPlot(brain2,'nFeature_NeighborhoodToCell_ALRA')+ylim(0,1000)
+cowplot::plot_grid(p1,p2,p3,p4,nrow=1)
+```
+
+Looks good. We can also check spatially:
+
+```{r}
+p1 <- SpatialFeaturePlot(brain2,'nCount_Spatial')+scale_color_continuous(trans = 'log10',limits = c(1,40000))
+p2 <- SpatialFeaturePlot(brain2,'nFeature_Spatial')+scale_color_continuous(trans = 'log10',limits = c(1,40000))
+p3 <- SpatialFeaturePlot(brain2,'nFeature_NeighborhoodToCell_Norm')+scale_color_continuous(limits = c(0,1000))
+p4 <- SpatialFeaturePlot(brain2,'nFeature_NeighborhoodToCell_ALRA')+scale_color_continuous(limits = c(0,1000))
+cowplot::plot_grid(p1,p2,p3,p4,nrow=1)
+```
+
+Looks great. Let's save for later analysis.
+
+## Save
+```{r eval=FALSE}
+save(brain2,file = '/Users/msbr/Library/CloudStorage/GoogleDrive-michasam.raredon@yale.edu/My Drive/Large_Files_Public/brain2/brain2.NICHES.Robj')
+```
