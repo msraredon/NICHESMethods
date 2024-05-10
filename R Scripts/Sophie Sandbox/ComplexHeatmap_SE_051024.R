@@ -114,17 +114,17 @@ ComplexHeatMap_SE_051024 <- function(object,
   # Value colors
   # col_fun = circlize::colorRamp2(c(-2, 0, 2), c("grey", "white", "blue"))
   if(use.scale.data == T){
-    col_fun = circlize::colorRamp2(c(min(to.plot)*range.frac,0, max(to.plot)*range.frac), c("#440154",'#21918c',"#fde725"))
+    col_fun = circlize::colorRamp2(c(min(to.plot)*range.frac,0, max(to.plot)*range.frac), c("#80120A",'#FB7A00',"#F8C8C9"))
     viridis::scale_fill_viridis() 
   }else{
-    col_fun = circlize::colorRamp2(c(0,max(to.plot)*range.frac), c("#440154", "#fde725"))
+    col_fun = circlize::colorRamp2(c(0,max(to.plot)*range.frac), c("#80120A", "#F8C8C9"))
   }
   
   # Legend title
   if(use.scale.data == T){
-    legend.title = 'Scaled Connectivity'
+    legend.title = 'Scaled Expression'
   }else{
-    legend.title = 'Connectivity'
+    legend.title = 'Expression'
   }
   # Heatmap with selected rows annotated
   if(!is.null(selected.row.anotations)){
@@ -155,7 +155,7 @@ ComplexHeatMap_SE_051024 <- function(object,
                               color_space = colors.inferno,
                               name = legend.title,
                               heatmap_legend_param = list(title_position = 'leftcenter-rot'),
-                              row_title = 'Signaling Mechanisms',
+                              row_title = 'Differentially Expressed Genes (DEGs)',
                               column_title = NULL,
                               left_annotation = HAleft)
     draw(heatmap.object,
@@ -178,7 +178,7 @@ ComplexHeatMap_SE_051024 <- function(object,
                               color_space = colors.inferno,
                               name = legend.title,
                               heatmap_legend_param = list(title_position = 'leftcenter-rot'),
-                              row_title = 'Signaling Mechanisms',
+                              row_title = 'Differentially Expressed Genes (DEGs)',
                               column_title = NULL)
     draw(heatmap.object,
          heatmap_legend_side='right',
