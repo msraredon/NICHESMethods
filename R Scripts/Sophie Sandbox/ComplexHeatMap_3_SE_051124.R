@@ -1,20 +1,20 @@
-ComplexHeatMap_SE_051024 <- function(object,
-                                    data.type = 'CellToCell',
-                                    primary = 'seurat_clusters' ,
-                                    secondary = 'SendingType' ,
-                                    #tertiary = 'ReceivingType' ,
-                                    #quarternary = 'orig.ident' ,
-                                    primary.cols = NULL,
-                                    secondary.cols = NULL, # Need to be a named list of colors
-                                    #tertiary.cols = NULL,
-                                    #quarternary.cols = NULL,
-                                    features = NULL,
-                                    labels = NULL,
-                                    selected.row.anotations=NULL,
-                                    selected.label.size = 10,
-                                    use.scale.data = T,
-                                    range.frac = 1,
-                                    row.dendrogram = F){
+ComplexHeatMap_3_SE_051124 <- function(object,
+                                     data.type = 'CellToCell',
+                                     primary = 'seurat_clusters' ,
+                                     secondary = 'SendingType' ,
+                                     tertiary = 'ReceivingType' ,
+                                     #quarternary = 'orig.ident' ,
+                                     primary.cols = NULL,
+                                     secondary.cols = NULL, # Need to be a named list of colors
+                                     tertiary.cols = NULL,
+                                     #quarternary.cols = NULL,
+                                     features = NULL,
+                                     labels = NULL,
+                                     selected.row.anotations=NULL,
+                                     selected.label.size = 10,
+                                     use.scale.data = T,
+                                     range.frac = 1,
+                                     row.dendrogram = F){
   # Packages
   require(tidyverse)
   require(RColorBrewer)
@@ -24,7 +24,7 @@ ComplexHeatMap_SE_051024 <- function(object,
   # Local functions
   # source("~/GitHub/Engineered-Lung-Analysis/SamCode/General Functions/gg_color_hue.R")
   source("/Users/sophieedelstein/Desktop/SE Single Cell/Organoids_BASC_Mono/gg_color_hue.R")
-
+  
   # add randomization column
   object$random <- sample(ncol(object))
   
@@ -40,7 +40,7 @@ ComplexHeatMap_SE_051024 <- function(object,
   meta.data <- meta.data[order(
     meta.data[[primary]],
     meta.data[[secondary]], # TEMPORARY EXPERIMENT FOR VISUALS - THIS CONTROLS THE ORDER OF THE BARS
-    #meta.data[[tertiary]],
+    meta.data[[tertiary]],
     meta.data[['random']]),] # Experiment 2024-04-18 to randomize order
   if(use.scale.data == T){
     to.plot <- as.matrix(focus@assays[[data.type]]$scale.data[MOI,meta.data$barcode])
@@ -70,15 +70,15 @@ ComplexHeatMap_SE_051024 <- function(object,
     secondary.colors <- secondary.cols[unique(meta.data[[secondary]])]
     names(secondary.colors) <- unique(meta.data[[secondary]])
   }
-  # # 3
-  # if(is.null(tertiary.cols)){
-  #   cols.3 <- RColorBrewer::brewer.pal(n=8,name='Accent')
-  #   tertiary.colors <- colorRampPalette(cols.3)(length(unique(meta.data[[tertiary]])))
-  #   names(tertiary.colors) <- unique(meta.data[[tertiary]])
-  # }else{
-  #   tertiary.colors <- tertiary.cols[unique(meta.data[[tertiary]])]
-  #   names(tertiary.colors) <- unique(meta.data[[tertiary]])
-  # }
+  # 3
+  if(is.null(tertiary.cols)){
+  cols.3 <- RColorBrewer::brewer.pal(n=8,name='Accent')
+  tertiary.colors <- colorRampPalette(cols.3)(length(unique(meta.data[[tertiary]])))
+  names(tertiary.colors) <- unique(meta.data[[tertiary]])
+   }else{
+  tertiary.colors <- tertiary.cols[unique(meta.data[[tertiary]])]
+  names(tertiary.colors) <- unique(meta.data[[tertiary]])
+ }
   # # 4
   # if(is.null(quarternary.cols)){
   #   cols.4 <- RColorBrewer::brewer.pal(n=12,name='Paired')
@@ -93,7 +93,7 @@ ComplexHeatMap_SE_051024 <- function(object,
   # Define annotations
   stuff <- data.frame(primary = meta.data[[primary]],
                       secondary = meta.data[[secondary]],
-                      #tertiary = meta.data[[tertiary]],
+                      tertiary = meta.data[[tertiary]],
                       #quartenary = meta.data[[quarternary]],
                       check.names = F)
   names(stuff) <- labels
@@ -101,8 +101,8 @@ ComplexHeatMap_SE_051024 <- function(object,
   # Define colors
   colors <- list(
     primary = primary.colors,
-    secondary = secondary.colors)#,
-    #tertiary = tertiary.colors)#,
+    secondary = secondary.colors, #,
+  tertiary = tertiary.colors) #,
   #quarternary = quarternary.colors)
   names(colors) <- labels
   
