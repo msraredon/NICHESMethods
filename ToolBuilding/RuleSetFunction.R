@@ -7,8 +7,8 @@ RuleSetFunction <- function(query.set = NULL, # A vector of mechanisms, consisti
     # Initialize new metadata
     feature.metadata <- data.frame(QUERY.SET = query.set.name,
                                    DEFINITION.LEVEL = NA,
-                              LIGAND.CATEGORY = NA,
-                              RECEPTOR.CATEGORY = NA,
+                              LIGAND.CLASS = NA,
+                              RECEPTOR.CLASS = NA,
                               LIGAND.FAMILY = NA,
                               RECEPTOR.FAMILY = NA,
                               MECHANISM = query.set,
@@ -30,6 +30,28 @@ RuleSetFunction <- function(query.set = NULL, # A vector of mechanisms, consisti
   
   
     ###### LIGAND.FAMILY  ######
+    ## Calcitonin
+    indices.temp <- grep(pattern = '^CALCA|^CALCB',
+                         x = feature.metadata$LIGAND,
+                         ignore.case = FALSE)
+    feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Calcitonin'
+    ## Adiponectin
+    indices.temp <- grep(pattern = '^ADIPOQ',
+                         x = feature.metadata$LIGAND,
+                         ignore.case = FALSE)
+    feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Adiponectin'
+    ## Neuromedin
+    indices.temp <- grep(pattern = '^NMU$|^NMB$|^NMS$',
+                         x = feature.metadata$LIGAND,
+                         ignore.case = FALSE)
+    feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Neuromedin'
+    
+    ## Transferrin
+    indices.temp <- grep(pattern = '^TF$',
+                         x = feature.metadata$LIGAND,
+                         ignore.case = FALSE)
+    feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Transferrin'
+    
     
     ## Selectin Ligand
     indices.temp <- grep(pattern = '^SELPL',
@@ -44,7 +66,7 @@ RuleSetFunction <- function(query.set = NULL, # A vector of mechanisms, consisti
     feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Natriuretic'
     
     ## ECM (misc)
-    indices.temp <- grep(pattern = '^ECM1',
+    indices.temp <- grep(pattern = '^ECM1|^ZP3$',
                          x = feature.metadata$LIGAND,
                          ignore.case = FALSE)
     feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'ECM (misc)'
@@ -60,9 +82,14 @@ RuleSetFunction <- function(query.set = NULL, # A vector of mechanisms, consisti
                          x = feature.metadata$LIGAND,
                          ignore.case = FALSE)
     feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Prosaposin'
+    ## Lymphoid Interaction
+    indices.temp <- grep(pattern = '^BTLA$|^CD40LG$',
+                         x = feature.metadata$LIGAND,
+                         ignore.case = FALSE)
+    feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Lymphoid Interaction'
     
     ## Intracellular (uncategorized)
-    indices.temp <- grep(pattern = '^FARP',
+    indices.temp <- grep(pattern = '^FARP|^HRAS$|^KRTAP4|^ARF1$|^SHANK1$|^C1orf|^C5orf|^C6orf',
                          x = feature.metadata$LIGAND,
                          ignore.case = FALSE)
     feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Intracellular (uncategorized)'
@@ -87,7 +114,7 @@ RuleSetFunction <- function(query.set = NULL, # A vector of mechanisms, consisti
     feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Repulsive guidance molecule'
     
     ## Intracellular Enzyme
-    indices.temp <- grep(pattern = '^DUSP',
+    indices.temp <- grep(pattern = '^DUSP|^AANAT|^HDC$',
                          x = feature.metadata$LIGAND,
                          ignore.case = FALSE)
     feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Intracellular Enzyme'
@@ -128,7 +155,7 @@ RuleSetFunction <- function(query.set = NULL, # A vector of mechanisms, consisti
     feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'TIMP'
     
     ## Intracellular
-    indices.temp <- grep(pattern = '^VIM',
+    indices.temp <- grep(pattern = '^VIM$|^MLLT4$',
                          x = feature.metadata$LIGAND,
                          ignore.case = FALSE)
     feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Intracellular'
@@ -228,7 +255,7 @@ RuleSetFunction <- function(query.set = NULL, # A vector of mechanisms, consisti
     feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Vitronectin'
     
     ## Complement
-    indices.temp <- grep(pattern = '^C1Q|^C3|^C4',
+    indices.temp <- grep(pattern = '^C1Q|^C3|^C4|^CD55$|^C5$',
                          x = feature.metadata$LIGAND,
                          ignore.case = FALSE)
     feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Complement'
@@ -439,11 +466,11 @@ RuleSetFunction <- function(query.set = NULL, # A vector of mechanisms, consisti
                          ignore.case = FALSE)
     feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'SLIT'
     
-    ## Neuropeptide Y
-    indices.temp <- grep(pattern = 'NPY',
+    ## Neuropeptide
+    indices.temp <- grep(pattern = '^NPW$|^NPY$|^NPB$|^POMC$|^PMCH$|^HCRT$',
                          x = feature.metadata$LIGAND,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Neuropeptide Y'
+    feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Neuropeptide'
     
     ### CC ...
     ## TNF
@@ -475,7 +502,7 @@ RuleSetFunction <- function(query.set = NULL, # A vector of mechanisms, consisti
     feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Neuroligin'
     
     ## IL
-    indices.temp <- grep(pattern = '^IL',
+    indices.temp <- grep(pattern = '^IL|^CLCF1$',
                          x = feature.metadata$LIGAND,
                          ignore.case = FALSE)
     feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Interleukin'
@@ -572,7 +599,7 @@ RuleSetFunction <- function(query.set = NULL, # A vector of mechanisms, consisti
     feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Heat-shock Protein '
     
     ## VIP 
-    indices.temp <- grep(pattern = '^VIP',
+    indices.temp <- grep(pattern = '^VIP|^ADCYAP',
                          x = feature.metadata$LIGAND,
                          ignore.case = FALSE)
     feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'VIP'
@@ -643,6 +670,11 @@ RuleSetFunction <- function(query.set = NULL, # A vector of mechanisms, consisti
                          x = feature.metadata$LIGAND,
                          ignore.case = FALSE)
     feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Tryptophan hydroxylase'
+    ## Coagulation
+    indices.temp <- grep(pattern = '^F2$|^F10$|^F12$|^F8$|^F7$|^F9$',
+                         x = feature.metadata$LIGAND,
+                         ignore.case = FALSE)
+    feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Coagulation'
     
     ## Secretin
     indices.temp <- grep(pattern = '^SCT',
@@ -655,7 +687,16 @@ RuleSetFunction <- function(query.set = NULL, # A vector of mechanisms, consisti
                          x = feature.metadata$LIGAND,
                          ignore.case = FALSE)
     feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Netrin'
-    
+    ## Growth Hormone
+    indices.temp <- grep(pattern = '^GH1$|^GH2$|^GHRH$',
+                         x = feature.metadata$LIGAND,
+                         ignore.case = FALSE)
+    feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Growth Hormone'
+    ## Ghrelin
+    indices.temp <- grep(pattern = '^GHRL$',
+                         x = feature.metadata$LIGAND,
+                         ignore.case = FALSE)
+    feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Ghrelin'
     ## Serpin 
     indices.temp <- grep(pattern = '^SERP',
                          x = feature.metadata$LIGAND,
@@ -703,6 +744,17 @@ RuleSetFunction <- function(query.set = NULL, # A vector of mechanisms, consisti
                          x = feature.metadata$LIGAND,
                          ignore.case = FALSE)
     feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'KIT'
+    ## Vasopressin
+    indices.temp <- grep(pattern = '^AVP$',
+                         x = feature.metadata$LIGAND,
+                         ignore.case = FALSE)
+    feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'Vasopressin'
+    ## C chemokine
+    indices.temp <- grep(pattern = '^XCL1$|^XCL2$',
+                         x = feature.metadata$LIGAND,
+                         ignore.case = FALSE)
+    feature.metadata[indices.temp,]$LIGAND.FAMILY <- 'C chemokine'
+    
     
     ###### RECEPTOR.FAMILY ######
     ## CXC Family Receptor
@@ -842,165 +894,179 @@ RuleSetFunction <- function(query.set = NULL, # A vector of mechanisms, consisti
                          ignore.case = FALSE)
     feature.metadata[indices.temp,]$RECEPTOR.FAMILY <- 'Activin'
     
-    ###### LIGAND.CATEGORY    ##### 
+    ###### LIGAND.CLASS    #####
     
+    ## Neuroproteins
+    indices.temp <- grep(pattern = 'Neuropeptide|Neuromedin',
+                         x = feature.metadata$LIGAND.FAMILY,
+                         ignore.case = FALSE)
+    feature.metadata[indices.temp,]$LIGAND.CLASS <- 'Neuroproteins'
+  
     ## Catalysis
     indices.temp <- grep(pattern = 'Presenilin',
                          x = feature.metadata$LIGAND.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$LIGAND.CATEGORY <- 'Catalysis'
+    feature.metadata[indices.temp,]$LIGAND.CLASS <- 'Catalysis'
     
     ## Cytosolic
     indices.temp <- grep(pattern = 'Cingulin|Intracellular|G Protein Complex|LRPAP|Heat-shock Protein|Myocilin|Intracellular Enzyme|Intracellular (uncategorized)',
                          x = feature.metadata$LIGAND.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$LIGAND.CATEGORY <- 'Cytosolic'
+    feature.metadata[indices.temp,]$LIGAND.CLASS <- 'Cytosolic'
     
     ## Protease Inhibition
     indices.temp <- grep(pattern = 'Serpin|Alpha Globulin',
                          x = feature.metadata$LIGAND.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$LIGAND.CATEGORY <- 'Protease Inhibition'
+    feature.metadata[indices.temp,]$LIGAND.CLASS <- 'Protease Inhibition'
     
     ## Kinin-Kallikrein System
     indices.temp <- grep(pattern = 'Kininogen',
                          x = feature.metadata$LIGAND.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$LIGAND.CATEGORY <- 'Kinin-Kallikrein System'
+    feature.metadata[indices.temp,]$LIGAND.CLASS <- 'Kinin-Kallikrein System'
     
     ## Cell-Cell Contact
     indices.temp <- grep(pattern = 'Cadherin|Cell Adhesion|Neuroligin|Contactin|Neurexophilin|Amyloid Beta Precursor|Selectin Ligand',
                          x = feature.metadata$LIGAND.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$LIGAND.CATEGORY <- 'Cell-Cell Contact'
+    feature.metadata[indices.temp,]$LIGAND.CLASS <- 'Cell-Cell Contact'
     
     ## Spatial Guidance
     indices.temp <- grep(pattern = 'Semaphorin|SLIT|Netrin|Ephrin|Reticulon|Repulsive guidance molecule',
                          x = feature.metadata$LIGAND.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$LIGAND.CATEGORY <- 'Spatial Guidance'
+    feature.metadata[indices.temp,]$LIGAND.CLASS <- 'Spatial Guidance'
     
     ## Metabolic
-    indices.temp <- grep(pattern = 'Apolipoprotein|Lipoprotein|Tryptophan hydroxylase',
+    indices.temp <- grep(pattern = 'Growth Hormone|Ghrelin|Adiponectin|Apolipoprotein|Lipoprotein|Tryptophan hydroxylase|^PPY$',
                          x = feature.metadata$LIGAND.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$LIGAND.CATEGORY <- 'Metabolic'
+    feature.metadata[indices.temp,]$LIGAND.CLASS <- 'Metabolic'
     
     ## Calcium
-    indices.temp <- grep(pattern = 'Calmodulin|Calreticulin',
+    indices.temp <- grep(pattern = 'Calmodulin|Calreticulin|Calcitonin',
                          x = feature.metadata$LIGAND.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$LIGAND.CATEGORY <- 'Calcium'
+    feature.metadata[indices.temp,]$LIGAND.CLASS <- 'Calcium'
     
-    ## Complement
-    indices.temp <- grep(pattern = 'Complement|VWF',
+    ## Circulatory Factors
+    indices.temp <- grep(pattern = 'Complement|VWF|Transferrin|Coagulation',
                          x = feature.metadata$LIGAND.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$LIGAND.CATEGORY <- 'Complement'
+    feature.metadata[indices.temp,]$LIGAND.CLASS <- 'Complement'
     
     ## Matrix Type
     indices.temp <- grep(pattern = 'Reelin|ECM (misc)|Fibulin|Fibrillin|MFAP|Osteopontin|TIMP|Collagen|Laminin|Fibronectin|Vitronectin|BGN|Decorin|TNC|Agrin|CTGF|CYR61|Versican|Neuregulin|Nephronectin|Thrombospondin|CTHRC1|Nidogen',
                          x = feature.metadata$LIGAND.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$LIGAND.CATEGORY <- 'Matrix'
+    feature.metadata[indices.temp,]$LIGAND.CLASS <- 'Matrix'
     
-    ## Paracrine Type
-    indices.temp <- grep(pattern = 'Natriuretic|Adrenomedullin|Endothelin|Agouti-related|Renin-Angiotensin|VIP|Urocortin|Relaxin|Sex Hormone Binding Protein',
+    ## Endocrine Type
+    indices.temp <- grep(pattern = 'Vasopressin|Natriuretic|Adrenomedullin|Endothelin|Agouti-related|Renin-Angiotensin|VIP|Urocortin|Relaxin|Sex Hormone Binding Protein',
                          x = feature.metadata$LIGAND.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$LIGAND.CATEGORY <- 'Paracrine'
+    feature.metadata[indices.temp,]$LIGAND.CLASS <- 'Endocrine'
     
     ## Antigen Presentation Type
     indices.temp <- grep(pattern = 'Antigen Presentation',
                          x = feature.metadata$LIGAND.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$LIGAND.CATEGORY <- 'Antigen Presentation'
+    feature.metadata[indices.temp,]$LIGAND.CLASS <- 'Antigen Presentation'
    
     ## Enzyme Type
     indices.temp <- grep(pattern = 'Extracellular Enzyme|Plasmin',
                          x = feature.metadata$LIGAND.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$LIGAND.CATEGORY <- 'Extracellular Enzyme'
+    feature.metadata[indices.temp,]$LIGAND.CLASS <- 'Extracellular Enzyme'
     
     ## GF Type
     indices.temp <- grep(pattern = 'KIT|Apelin|WNT|CSF|PDGF|VEGF|NGF|PGF|BMP|TGFB|FGF|IGF|EGF|GDF|ANGPT|BDNF|HGF|GDNF|NEGF|CNTF|NOTCH|Activin|Inhibin|Hedgehog',
                          x = feature.metadata$LIGAND.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$LIGAND.CATEGORY <- 'Growth Factor'
+    feature.metadata[indices.temp,]$LIGAND.CLASS <- 'Growth Factor'
     
     ## Cytokine Category
-    indices.temp <- grep(pattern = 'Interleukin|Interferon|CCL|CXC|TNF|Oncostatin M|Calprotectin|Cathelicidin',
+    indices.temp <- grep(pattern = 'Interleukin|Interferon|C chemokine|CCL|CXC|TNF|Oncostatin M|Calprotectin|Cathelicidin',
                          x = feature.metadata$LIGAND.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$LIGAND.CATEGORY <- 'Cytokine'
+    feature.metadata[indices.temp,]$LIGAND.CLASS <- 'Cytokine'
     
     ## Difficult to categorize
     indices.temp <- grep(pattern = 'Prosaposin',
                          x = feature.metadata$LIGAND.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$LIGAND.CATEGORY <- 'Difficult to Categorize'
+    feature.metadata[indices.temp,]$LIGAND.CLASS <- 'Difficult to Categorize'
     
-    ###### RECEPTOR.CATEGORY    ##### 
+    ###### RECEPTOR.CLASS    ##### 
     
     ## Plexin
     indices.temp <- grep(pattern = 'Plexin',
                          x = feature.metadata$RECEPTOR.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$RECEPTOR.CATEGORY <- 'Plexin'
+    feature.metadata[indices.temp,]$RECEPTOR.CLASS <- 'Plexin'
     
     ## Activin
     indices.temp <- grep(pattern = 'Activin',
                          x = feature.metadata$RECEPTOR.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$RECEPTOR.CATEGORY <- 'Activin'
+    feature.metadata[indices.temp,]$RECEPTOR.CLASS <- 'Activin'
     
     ## Toll-Like Interactions
     indices.temp <- grep(pattern = 'Toll-Like Receptor',
                          x = feature.metadata$RECEPTOR.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$RECEPTOR.CATEGORY <- 'Toll-Like Receptor'
+    feature.metadata[indices.temp,]$RECEPTOR.CLASS <- 'Toll-Like Receptor'
     
     ## Ephrin Interactions
     indices.temp <- grep(pattern = 'Ephrin',
                          x = feature.metadata$RECEPTOR.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$RECEPTOR.CATEGORY <- 'Ephrin Family Receptor'
+    feature.metadata[indices.temp,]$RECEPTOR.CLASS <- 'Ephrin Family Receptor'
     
     ## Integrin Interactions
     indices.temp <- grep(pattern = 'Integrin',
                          x = feature.metadata$RECEPTOR.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$RECEPTOR.CATEGORY <- 'Integrin'
+    feature.metadata[indices.temp,]$RECEPTOR.CLASS <- 'Integrin'
     
     ## Growth Factor Receptor 
     indices.temp <- grep(pattern = 'WNT|CSF|PDGF|VEGF|NGF|PGF|BMP|TGFB|FGF|IGF|EGF|GDF|ANGPT|BDNF|HGF|GDNF|NEGF|CNTF',
                          x = feature.metadata$RECEPTOR.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$RECEPTOR.CATEGORY <- 'Growth Factor Receptor'
+    feature.metadata[indices.temp,]$RECEPTOR.CLASS <- 'Growth Factor Receptor'
     
     ## Cytokine Receptor 
     indices.temp <- grep(pattern = '^CXC Family|^CC Family',
                          x = feature.metadata$RECEPTOR.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$RECEPTOR.CATEGORY <- 'Cytokine Receptor'
+    feature.metadata[indices.temp,]$RECEPTOR.CLASS <- 'Cytokine Receptor'
     ## Metabolic
     indices.temp <- grep(pattern = 'Lipid',
                          x = feature.metadata$RECEPTOR.FAMILY,
                          ignore.case = FALSE)
-    feature.metadata[indices.temp,]$RECEPTOR.CATEGORY <- 'Metabolic'
+    feature.metadata[indices.temp,]$RECEPTOR.CLASS <- 'Metabolic'
     
     
     ## Definition Level (for MSBR reference)
-    temp <- feature.metadata[,c('LIGAND.CATEGORY',
-                                'RECEPTOR.CATEGORY',
+    temp <- feature.metadata[,c('LIGAND.CLASS',
+                                'RECEPTOR.CLASS',
                                 "LIGAND.FAMILY",
                                 "RECEPTOR.FAMILY")]
     temp <- !is.na(temp)
     
     feature.metadata$DEFINITION.LEVEL <- as.character(rowSums(temp))
 
+    
+    ###### Format for output ####
+    feature.metadata$LIGAND.CLASS <- factor(feature.metadata$LIGAND.CLASS)
+    feature.metadata$RECEPTOR.CLASS <- factor(feature.metadata$RECEPTOR.CLASS)
+    feature.metadata$LIGAND.FAMILY <- factor(feature.metadata$LIGAND.FAMILY)
+    feature.metadata$RECEPTOR.FAMILY <- factor(feature.metadata$RECEPTOR.FAMILY)
+    #### Return ####
     return(feature.metadata)
     }
-    
-    
-    
+  
+# test
+output <- RuleSetFunction(query.set = NICHES::ncomms8866$Pair.Name)    
+to.do <- output[output$DEFINITION.LEVEL==0,]

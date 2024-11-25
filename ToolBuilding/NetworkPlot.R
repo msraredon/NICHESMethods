@@ -179,7 +179,7 @@ NetworkPlot <- function(transcriptome.object, # scRNAseq object containing all p
     ligand.info.to.plot <- transcriptome.information[downsampled$SendingBarcode,] # not sure why this sometimes has NA in it?
     
     # plot colored points
-   
+    if(black.points==F){
       # Add receptor expressivity
 
       output.plot <- connectivity.plot + 
@@ -199,10 +199,10 @@ NetworkPlot <- function(transcriptome.object, # scRNAseq object containing all p
                    aes(color = ligand.info.to.plot$ligand.info),#,
                        #alpha = ligand.info.to.plot$ligand.info),
                    size = point.size)
-      
+    }
       # if black points ==T
       if(black.points==T){
-        output.plot <- output.plot + 
+        output.plot <- connectivity.plot + 
           geom_point(data=transcriptome.object,
                      size = point.size)# use aes_() here
       }
@@ -307,7 +307,7 @@ NetworkPlot <- function(transcriptome.object, # scRNAseq object containing all p
       
       # Plot black points or colored points
       
-      
+      if(black.points==F){
       # Add receptor expressivity
       output.plot <- connectivity.plot + 
         ggnewscale::new_scale_color() +
@@ -325,10 +325,10 @@ NetworkPlot <- function(transcriptome.object, # scRNAseq object containing all p
                    aes(color = ligand.info.to.plot$ligand.info),#,
                    #alpha = ligand.info.to.plot$ligand.info),
                    size = point.size)
-      
+      }
       # if black points ==T
       if(black.points==T){
-        output.plot <- output.plot + 
+        output.plot <- connectivity.plot + 
           geom_point(data=transcriptomic.list[[i]],
                       size = point.size)# use aes_() here
       }
