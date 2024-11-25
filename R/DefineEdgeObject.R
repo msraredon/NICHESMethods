@@ -5,11 +5,13 @@ DefineEdgeObject <- function(connect.obj,
   if(!(feature %in% rownames(connect.obj))){
     stop('feature not present in connect.obj')
   }else{}
-  
+
   # extract & store information
-  edge.object <- data.frame(feature.value = connect.obj@assays[[assay]]@data[feature,])
+  rownames(connect.obj[[assay]]@layers$data) <- rownames(connect.obj)
+  colnames(connect.obj[[assay]]@layers$data) <- colnames(connect.obj)
+  edge.object <- data.frame(feature.value = connect.obj@assays[[assay]]@layers$data[feature,])
   edge.object$barcode.pair <- rownames(edge.object)
-  
+
   # extract metadata
   edge.object <- cbind(edge.object,connect.obj@meta.data)
   return(edge.object)
