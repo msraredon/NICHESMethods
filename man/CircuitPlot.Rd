@@ -63,8 +63,6 @@ CircuitPlot(
 \item{min.edge.value}{Default 0. The minimum represented value for connectivity strength.}
 
 \item{max.edge.value}{Default NULL. The maximum represented value for connectivity strength. Allows user-defined global scale for multi-plot comparisons. ### MSBR may want to update how we handle this, may want to generalize better.}
-
-\item{name}{description}
 }
 \value{
 A circuit plot (ggplot object if plot.function == 'ggCircuit')

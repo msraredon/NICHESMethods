@@ -1,7 +1,5 @@
 #' CircuitPlot
 #'
-#' @param name description
-#'
 #' @param transcr.obj A transcriptomic object
 #' @param connect.obj A connectomic object, ideally paired with / derived from the transcriptomic object.
 #' @param feature A connectomic feature (signaling mechanism), with and 'em dash' ("—") as separator
