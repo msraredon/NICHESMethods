@@ -71,7 +71,8 @@ CircuitPlot <- function(transcr.obj,
                               cols.use = cols.use,
                               edge.fixed.size = edge.fixed.size,
                               min.edge.value = min.edge.value,
-                              max.edge.value = max.edge.value)
+                              max.edge.value = max.edge.value,
+                              title = feature)
   }
 
   circuit.plot

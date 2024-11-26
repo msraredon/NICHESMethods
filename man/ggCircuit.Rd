@@ -19,7 +19,8 @@ ggCircuit(
   edge.fixed.size,
   split.by = FALSE,
   min.edge.value = NULL,
-  max.edge.value = NULL
+  max.edge.value = NULL,
+  title = NULL
 )
 }
 \arguments{

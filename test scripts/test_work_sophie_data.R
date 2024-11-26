@@ -19,6 +19,8 @@ check() # check that it works
 load("/Volumes/Home/RaredonLab-CC1126-MEDANE/Raredon_Lab_Personal_Folders/Sophie/Single Cell/Single Cell Samples - Nuoya Collaboration/BAMC/BAMC.CTC.integrated.Robj")
 load("/Volumes/Home/RaredonLab-CC1126-MEDANE/Raredon_Lab_Personal_Folders/Sophie/Single Cell/Single Cell Samples - Nuoya Collaboration/BAMC/BAMC.integrated_NAs.Robj")
 
+
+
 # inspect
 color_pal <- c('#A40606','#9CFFFA','#B0DB43','#9C528B','#2F6690',
                '#946846','#F1C40F','green','#0F0326','#E65F5C','#14591D','#726DA8',
@@ -26,21 +28,22 @@ color_pal <- c('#A40606','#9CFFFA','#B0DB43','#9C528B','#2F6690',
 color_pal <- color_pal[1:length(unique(node.object$New_Annotations))]
 names(color_pal) <- unique(node.object$New_Annotations)
 
-Seurat::DimPlot(BAMC.CTC.integrated,label = T)
-Seurat::DimPlot(BAMC.CTC.integrated,group.by = 'SendingType',cols = color_pal,shuffle=T)
-Seurat::DimPlot(BAMC.CTC.integrated,group.by = 'ReceivingType',cols = color_pal,shuffle = T)
-FeaturePlot(BAMC.CTC.integrated,'Igf1—Igf1r')
-FeaturePlot(BAMC.CTC.integrated,'Areg—Egfr')
+
+Seurat::DimPlot(BAMC.CTC.integrated,label = T, reduction = "umap.rpca")
+Seurat::DimPlot(BAMC.CTC.integrated,group.by = 'SendingType',cols = New_Annotations.Sending, reduction = "umap.rpca")
+Seurat::DimPlot(BAMC.CTC.integrated,group.by = 'ReceivingType',cols = New_Annotations.Receiving,reduction = "umap.rpca")
+FeaturePlot(BAMC.CTC.integrated,'Igf1—Igf1r', reduction = "umap.rpca")
+FeaturePlot(BAMC.CTC.integrated,'Areg—Egfr', reduction = "umap.rpca")
 
 mark <- FindAllMarkers(BAMC.CTC.integrated,min.pct = 0.5)
 mark$ratio <- mark$pct.1/mark$pct.2
 
 # test
 node.object <- DefineNodeObject(transcr.obj = BAMC.integrated,
-                                feature = 'Areg')
+                                feature = 'Il24')
 
 edge.object <- DefineEdgeObject(connect.obj = BAMC.CTC.integrated,
-                                feature = 'Areg—Egfr',
+                                feature = 'Il24—Il22ra1',
                                 assay = 'CellToCell')
 
 node.aggregate <- AggregateNodeData(node.object = node.object,
@@ -79,5 +82,5 @@ CircuitPlot(transcr.obj = lung.combined,
             arrow.head.angle = 15,
             arrow.head.length = 0.03,
             autocrine.arrow.curvature = 10,
-            cols.use = RColorBrewer::brewer.pal(4,'Set2'),
+            cols.use = ,
             edge.fixed = T)

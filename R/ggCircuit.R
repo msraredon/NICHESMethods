@@ -25,7 +25,8 @@ ggCircuit <- function(edge.aggregate,
                         edge.fixed.size,
                         split.by = FALSE,
                         min.edge.value = NULL,
-                        max.edge.value = NULL
+                        max.edge.value = NULL,
+                        title = NULL
                         ){
 
   #### Step 1: Define node info and add coordinates for nodes centered around origin ####
@@ -399,7 +400,8 @@ ggCircuit <- function(edge.aggregate,
     Seurat::NoAxes()+
     #Seurat::NoLegend() +
     xlim(-1.1,1.1)+
-    ylim(-1.1,1.1)
+    ylim(-1.1,1.1)+
+    ggplot2::ggtitle(title)
 
   circuit.plot
 
