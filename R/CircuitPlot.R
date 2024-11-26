@@ -1,3 +1,18 @@
+#' CircuitPlot
+#'
+#' @param name description
+#'
+#' @param transcr.obj A transcriptomic object
+#' @param connect.obj A connectomic object, ideally paired with / derived from the transcriptomic object.
+#' @param feature A connectomic feature (signaling mechanism), with and 'em dash' ("—") as separator
+#' @param plot.function The base function to use. Currentyl only option is 'ggCircuit', which is a custom sub-function in NICHESMethods, based on trigonometry + ggplot2. May also be able to build an iGraph-based version in the future.
+#' @param group.by Character string. Name of the grouping variable to use. Must be in the metadata of the transcriptomic object.
+#' @param graph.angle The orientation angle of the whole CircuitPlot graph, rotational.
+#' @param h Arrow start and end offset from node center (the amount the arrows are shortened on center.)
+#' @param offset Spacing between opposite direction paracrine arrows, from common center line.
+#' @param autocrine.offset
+#' @return A circuit plot (ggplot object if plot.function == 'ggCircuit')
+
 CircuitPlot <- function(transcr.obj,
                         connect.obj,
                         feature,
@@ -24,7 +39,7 @@ CircuitPlot <- function(transcr.obj,
                                   feature = ligand)
   edge.object <- DefineEdgeObject(connect.obj = connect.obj,
                                   feature = feature)
-  
+
   # AggregateObjects
   group.by.edge <- paste(group.by,'Joint',sep='.')
   #options(warn = -1)
@@ -34,7 +49,7 @@ CircuitPlot <- function(transcr.obj,
   edge.aggregate <- AggregateEdgeData(edge.object = edge.object,
                                       group.by = group.by.edge)
   #options(warn = 0)
-  
+
   # Plot with desired plot.function
   if(plot.function == 'ggCircuit'){
     circuit.plot <- ggCircuit(node.aggregate = node.aggregate,
@@ -52,7 +67,7 @@ CircuitPlot <- function(transcr.obj,
                               min.edge.value = min.edge.value,
                               max.edge.value = max.edge.value)
   }
-  
+
   circuit.plot
   return(circuit.plot)
 }
