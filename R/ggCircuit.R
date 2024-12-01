@@ -12,28 +12,28 @@
 #' @return A circuit plot (ggplot object)
 
 ggCircuit <- function(edge.aggregate,
-                        node.aggregate,
-                        graph.angle,
-                        h,
-                        offset,
-                        autocrine.offset,
-                        edge.scale.factor,
-                        arrow.head.angle,
-                        arrow.head.length,
-                        autocrine.arrow.curvature,
-                        cols.use,
-                        edge.fixed.size,
-                        split.by = FALSE,
-                        min.edge.value = NULL,
-                        max.edge.value = NULL,
-                        title = NULL
-                        ){
+                      node.aggregate,
+                      graph.angle,
+                      h,
+                      offset,
+                      autocrine.offset,
+                      edge.scale.factor,
+                      arrow.head.angle,
+                      arrow.head.length,
+                      autocrine.arrow.curvature,
+                      cols.use,
+                      edge.fixed.size,
+                      split.by = FALSE,
+                      min.edge.value = NULL,
+                      max.edge.value = NULL,
+                      title = NULL
+){
 
   #### Step 1: Define node info and add coordinates for nodes centered around origin ####
 
   node.info <- cbind(node.aggregate,
-                 netCoin::layoutCircle(data.frame(node.aggregate$node.label),
-                                       deg=graph.angle))
+                     netCoin::layoutCircle(data.frame(node.aggregate$node.label),
+                                           deg=graph.angle))
 
   #### Step 2: Define edge info and add start and end coordinates for each edge ####
   edge.info <- edge.aggregate
@@ -45,10 +45,10 @@ ggCircuit <- function(edge.aggregate,
   #### Step 3: Categorize each edge as either autocrine (which will get loops) or paracrine (linear arrows) ####
   edge.info$category.AP <- NA
   if(length(which(paste(edge.info$x.start,edge.info$y.start)==paste(edge.info$x.end,edge.info$y.end)))>0){
-  edge.info[which(paste(edge.info$x.start,edge.info$y.start)==paste(edge.info$x.end,edge.info$y.end)),]$category.AP <- 'Autocrine'
+    edge.info[which(paste(edge.info$x.start,edge.info$y.start)==paste(edge.info$x.end,edge.info$y.end)),]$category.AP <- 'Autocrine'
   }
   if(length(which(paste(edge.info$x.start,edge.info$y.start)!=paste(edge.info$x.end,edge.info$y.end)))>0){
-  edge.info[which(paste(edge.info$x.start,edge.info$y.start)!=paste(edge.info$x.end,edge.info$y.end)),]$category.AP <- 'Paracrine'
+    edge.info[which(paste(edge.info$x.start,edge.info$y.start)!=paste(edge.info$x.end,edge.info$y.end)),]$category.AP <- 'Paracrine'
   }
   #### Step 4: Define dx, dy, and angle for each edge ####
   edge.info$dx <- edge.info$x.end-edge.info$x.start
@@ -115,19 +115,19 @@ ggCircuit <- function(edge.aggregate,
         edge.info[i,]$y.end.adj <- edge.info[i,]$y.end - abs(edge.info[i,]$y.delta)
       }else{
         # if dx is negative, then start x-y- end x+y+
-      edge.info[i,]$x.start.adj <- edge.info[i,]$x.start - abs(edge.info[i,]$x.delta)
-      edge.info[i,]$y.start.adj <- edge.info[i,]$y.start - abs(edge.info[i,]$y.delta)
-      edge.info[i,]$x.end.adj <- edge.info[i,]$x.end + abs(edge.info[i,]$x.delta)
-      edge.info[i,]$y.end.adj <- edge.info[i,]$y.end + abs(edge.info[i,]$y.delta)
+        edge.info[i,]$x.start.adj <- edge.info[i,]$x.start - abs(edge.info[i,]$x.delta)
+        edge.info[i,]$y.start.adj <- edge.info[i,]$y.start - abs(edge.info[i,]$y.delta)
+        edge.info[i,]$x.end.adj <- edge.info[i,]$x.end + abs(edge.info[i,]$x.delta)
+        edge.info[i,]$y.end.adj <- edge.info[i,]$y.end + abs(edge.info[i,]$y.delta)
       }
     }
     if(!is.na(edge.info[i,]$quadrant) & edge.info[i,]$quadrant =='quad.2'){
       if(edge.info[i,]$dx > 0){
         # if dx is positive, then start x+y- end x-y+
-      edge.info[i,]$x.start.adj <- edge.info[i,]$x.start + abs(edge.info[i,]$x.delta)
-      edge.info[i,]$y.start.adj <- edge.info[i,]$y.start - abs(edge.info[i,]$y.delta)
-      edge.info[i,]$x.end.adj <- edge.info[i,]$x.end - abs(edge.info[i,]$x.delta)
-      edge.info[i,]$y.end.adj <- edge.info[i,]$y.end + abs(edge.info[i,]$y.delta)
+        edge.info[i,]$x.start.adj <- edge.info[i,]$x.start + abs(edge.info[i,]$x.delta)
+        edge.info[i,]$y.start.adj <- edge.info[i,]$y.start - abs(edge.info[i,]$y.delta)
+        edge.info[i,]$x.end.adj <- edge.info[i,]$x.end - abs(edge.info[i,]$x.delta)
+        edge.info[i,]$y.end.adj <- edge.info[i,]$y.end + abs(edge.info[i,]$y.delta)
       }else{
         # if dx is negative, then start x-y+ end x+y-
         edge.info[i,]$x.start.adj <- edge.info[i,]$x.start - abs(edge.info[i,]$x.delta)
@@ -135,14 +135,14 @@ ggCircuit <- function(edge.aggregate,
         edge.info[i,]$x.end.adj <- edge.info[i,]$x.end + abs(edge.info[i,]$x.delta)
         edge.info[i,]$y.end.adj <- edge.info[i,]$y.end - abs(edge.info[i,]$y.delta)
       }
-      }
+    }
     if(!is.na(edge.info[i,]$quadrant) & edge.info[i,]$quadrant =='quad.3'){
       if(edge.info[i,]$dx > 0){
         # if dx is positive, then start x+y+ end x-y-
-      edge.info[i,]$x.start.adj <- edge.info[i,]$x.start + abs(edge.info[i,]$x.delta)
-      edge.info[i,]$y.start.adj <- edge.info[i,]$y.start + abs(edge.info[i,]$y.delta)
-      edge.info[i,]$x.end.adj <- edge.info[i,]$x.end - abs(edge.info[i,]$x.delta)
-      edge.info[i,]$y.end.adj <- edge.info[i,]$y.end - abs(edge.info[i,]$y.delta)
+        edge.info[i,]$x.start.adj <- edge.info[i,]$x.start + abs(edge.info[i,]$x.delta)
+        edge.info[i,]$y.start.adj <- edge.info[i,]$y.start + abs(edge.info[i,]$y.delta)
+        edge.info[i,]$x.end.adj <- edge.info[i,]$x.end - abs(edge.info[i,]$x.delta)
+        edge.info[i,]$y.end.adj <- edge.info[i,]$y.end - abs(edge.info[i,]$y.delta)
       }else{
         # if dx is negative, then start x-y- end x+y+
         edge.info[i,]$x.start.adj <- edge.info[i,]$x.start - abs(edge.info[i,]$x.delta)
@@ -150,7 +150,7 @@ ggCircuit <- function(edge.aggregate,
         edge.info[i,]$x.end.adj <- edge.info[i,]$x.end + abs(edge.info[i,]$x.delta)
         edge.info[i,]$y.end.adj <- edge.info[i,]$y.end + abs(edge.info[i,]$y.delta)
       }
-      }
+    }
     if(!is.na(edge.info[i,]$quadrant) & edge.info[i,]$quadrant =='quad.4'){
       if(edge.info[i,]$dx > 0){
         # if dx is positive, then start x+y- end x-y+
@@ -213,10 +213,10 @@ ggCircuit <- function(edge.aggregate,
     if(!is.na(edge.info[i,]$quadrant) & edge.info[i,]$quadrant=='quad.1'){
       if(edge.info[i,]$dx > 0){
         # if dx is positive, then start x-y+ end x-y+
-      edge.info[i,]$x.start.offset <- edge.info[i,]$x.start.adj - abs(edge.info[i,]$x.offset)
-      edge.info[i,]$y.start.offset <- edge.info[i,]$y.start.adj + abs(edge.info[i,]$y.offset)
-      edge.info[i,]$x.end.offset <- edge.info[i,]$x.end.adj - abs(edge.info[i,]$x.offset)
-      edge.info[i,]$y.end.offset <- edge.info[i,]$y.end.adj + abs(edge.info[i,]$y.offset)
+        edge.info[i,]$x.start.offset <- edge.info[i,]$x.start.adj - abs(edge.info[i,]$x.offset)
+        edge.info[i,]$y.start.offset <- edge.info[i,]$y.start.adj + abs(edge.info[i,]$y.offset)
+        edge.info[i,]$x.end.offset <- edge.info[i,]$x.end.adj - abs(edge.info[i,]$x.offset)
+        edge.info[i,]$y.end.offset <- edge.info[i,]$y.end.adj + abs(edge.info[i,]$y.offset)
       }else{
         # if dx is negative, then start x+y- end x+y-
         edge.info[i,]$x.start.offset <- edge.info[i,]$x.start.adj + abs(edge.info[i,]$x.offset)
@@ -225,14 +225,14 @@ ggCircuit <- function(edge.aggregate,
         edge.info[i,]$y.end.offset <- edge.info[i,]$y.end.adj - abs(edge.info[i,]$y.offset)
 
       }
-      }
+    }
     if(!is.na(edge.info[i,]$quadrant) & edge.info[i,]$quadrant =='quad.2'){
       if(edge.info[i,]$dx > 0){
         # if dx is positive, then start x+y+ end x+y+
-      edge.info[i,]$x.start.offset <- edge.info[i,]$x.start.adj + abs(edge.info[i,]$x.offset)
-      edge.info[i,]$y.start.offset <- edge.info[i,]$y.start.adj + abs(edge.info[i,]$y.offset)
-      edge.info[i,]$x.end.offset <- edge.info[i,]$x.end.adj + abs(edge.info[i,]$x.offset)
-      edge.info[i,]$y.end.offset <- edge.info[i,]$y.end.adj + abs(edge.info[i,]$y.offset)
+        edge.info[i,]$x.start.offset <- edge.info[i,]$x.start.adj + abs(edge.info[i,]$x.offset)
+        edge.info[i,]$y.start.offset <- edge.info[i,]$y.start.adj + abs(edge.info[i,]$y.offset)
+        edge.info[i,]$x.end.offset <- edge.info[i,]$x.end.adj + abs(edge.info[i,]$x.offset)
+        edge.info[i,]$y.end.offset <- edge.info[i,]$y.end.adj + abs(edge.info[i,]$y.offset)
       }else{
         # if dx is negative, then start x-y- end x-y-
         edge.info[i,]$x.start.offset <- edge.info[i,]$x.start.adj - abs(edge.info[i,]$x.offset)
@@ -240,14 +240,14 @@ ggCircuit <- function(edge.aggregate,
         edge.info[i,]$x.end.offset <- edge.info[i,]$x.end.adj - abs(edge.info[i,]$x.offset)
         edge.info[i,]$y.end.offset <- edge.info[i,]$y.end.adj - abs(edge.info[i,]$y.offset)
       }
-      }
+    }
     if(!is.na(edge.info[i,]$quadrant) & edge.info[i,]$quadrant =='quad.3'){
       if(edge.info[i,]$dx > 0){
         # if dx is positive, then start x-y+ end x-y+
-      edge.info[i,]$x.start.offset <- edge.info[i,]$x.start.adj -  abs(edge.info[i,]$x.offset)
-      edge.info[i,]$y.start.offset <- edge.info[i,]$y.start.adj + abs(edge.info[i,]$y.offset)
-      edge.info[i,]$x.end.offset <- edge.info[i,]$x.end.adj - abs(edge.info[i,]$x.offset)
-      edge.info[i,]$y.end.offset <- edge.info[i,]$y.end.adj + abs(edge.info[i,]$y.offset)
+        edge.info[i,]$x.start.offset <- edge.info[i,]$x.start.adj -  abs(edge.info[i,]$x.offset)
+        edge.info[i,]$y.start.offset <- edge.info[i,]$y.start.adj + abs(edge.info[i,]$y.offset)
+        edge.info[i,]$x.end.offset <- edge.info[i,]$x.end.adj - abs(edge.info[i,]$x.offset)
+        edge.info[i,]$y.end.offset <- edge.info[i,]$y.end.adj + abs(edge.info[i,]$y.offset)
       }else{
         # if dx is negative, then start x+y- end x+y-
         edge.info[i,]$x.start.offset <- edge.info[i,]$x.start.adj +  abs(edge.info[i,]$x.offset)
@@ -259,10 +259,10 @@ ggCircuit <- function(edge.aggregate,
     if(!is.na(edge.info[i,]$quadrant) & edge.info[i,]$quadrant =='quad.4'){
       if(edge.info[i,]$dx > 0){
         # if dx is positive, then start x+y+ end x+y+
-      edge.info[i,]$x.start.offset <- edge.info[i,]$x.start.adj + abs(edge.info[i,]$x.offset)
-      edge.info[i,]$y.start.offset <- edge.info[i,]$y.start.adj + abs(edge.info[i,]$y.offset)
-      edge.info[i,]$x.end.offset <- edge.info[i,]$x.end.adj + abs(edge.info[i,]$x.offset)
-      edge.info[i,]$y.end.offset <- edge.info[i,]$y.end.adj + abs(edge.info[i,]$y.offset)
+        edge.info[i,]$x.start.offset <- edge.info[i,]$x.start.adj + abs(edge.info[i,]$x.offset)
+        edge.info[i,]$y.start.offset <- edge.info[i,]$y.start.adj + abs(edge.info[i,]$y.offset)
+        edge.info[i,]$x.end.offset <- edge.info[i,]$x.end.adj + abs(edge.info[i,]$x.offset)
+        edge.info[i,]$y.end.offset <- edge.info[i,]$y.end.adj + abs(edge.info[i,]$y.offset)
       }else{
         # if dx is negative, then start x-y- end x-y-
         edge.info[i,]$x.start.offset <- edge.info[i,]$x.start.adj - abs(edge.info[i,]$x.offset)
@@ -300,12 +300,12 @@ ggCircuit <- function(edge.aggregate,
 
   # Define global plot parameters, if not input by user
   if(is.null(min.edge.value)){
-  min.edge.value <- min(edge.info$feature.value)
+    min.edge.value <- min(edge.info$feature.value)
   }else{
     min.edge.value <- min.edge.value
   }
   if(is.null(max.edge.value)){
-  max.edge.value <- max(edge.info$feature.value)
+    max.edge.value <- max(edge.info$feature.value)
   }else{
     max.edge.value <- max.edge.value
   }
@@ -319,30 +319,30 @@ ggCircuit <- function(edge.aggregate,
 
   # PLOT FIXED EDGES
   if(edge.fixed.size){
-  circuit.plot <- b +
+    circuit.plot <- b +
 
-    geom_segment(data = edge.info[edge.info$category.AP=='Paracrine',],
-                 aes(x = x.start.offset,
-                     y = y.start.offset,
-                     xend = x.end.offset,
-                     yend = y.end.offset,
-                     # size = feature.value/edge.scale.factor
-                     alpha = feature.value),
-                 size = edge.fixed.size,
-                 arrow = grid::arrow(angle = arrow.head.angle, # how 'fat' the arrowheads are
-                                     length = unit(arrow.head.length, "npc"), # size of the arrowheads, including 0
-                                     ends = 'last',
-                                     type = 'open'))+
+      geom_segment(data = edge.info[edge.info$category.AP=='Paracrine',],
+                   aes(x = x.start.offset,
+                       y = y.start.offset,
+                       xend = x.end.offset,
+                       yend = y.end.offset,
+                       # size = feature.value/edge.scale.factor
+                       alpha = feature.value),
+                   size = edge.fixed.size,
+                   arrow = grid::arrow(angle = arrow.head.angle, # how 'fat' the arrowheads are
+                                       length = unit(arrow.head.length, "npc"), # size of the arrowheads, including 0
+                                       ends = 'last',
+                                       type = 'open'))+
 
       geom_curve(data = edge.info[edge.info$category.AP=='Autocrine',],
                  aes(x = x.start,
-                    y = y.start,
-                    xend = x.end+autocrine.offset,
-                    yend = y.end+autocrine.offset,
-                    alpha = feature.value),
+                     y = y.start,
+                     xend = x.end+autocrine.offset,
+                     yend = y.end+autocrine.offset,
+                     alpha = feature.value),
                  size = edge.fixed.size,
-               curvature = autocrine.arrow.curvature,
-               ncp = 10,
+                 curvature = autocrine.arrow.curvature,
+                 ncp = 10,
                  arrow = grid::arrow(angle = arrow.head.angle, # how 'fat' the arrowheads are
                                      length = unit(arrow.head.length, "npc"), # size of the arrowheads, including 0
                                      ends = 'last',
@@ -382,29 +382,27 @@ ggCircuit <- function(edge.aggregate,
                                      type = 'open'))
   }
 
-  # Scale edges (allows global scaling with other plots)
   circuit.plot <- circuit.plot +
-                  scale_alpha_continuous(range=c(0.01,1),
-                                          limits=c(min.edge.value,max.edge.value),
-                                            name='Connectivity',trans = 'sqrt')
+    scale_alpha_continuous(range=c(0.01,1),
+                           limits=c(min.edge.value,max.edge.value),
+                           name='Connectivity',trans = 'sqrt')
   # Add nodes on top
   circuit.plot <- circuit.plot +
-      geom_point(data = node.info,
-             aes(size = ifelse(system.fraction==0, NA, system.fraction),
-                 color = node.label))+
-      #geom_text(aes(label = node.label),hjust=1, vjust=1,size=2)+
-      scale_color_manual(values = cols.use)+
-      scale_size_continuous(range = c(0,6),limits = c(0,1),name = 'System Fraction',trans = 'sqrt')+
-
-      theme_classic()+
-    Seurat::NoAxes()+
+    geom_point(data = node.info,
+               aes(size = ifelse(system.fraction==0, NA, system.fraction),
+                   color = node.label))+
+    # geom_text(aes(label = node.label),hjust=1, vjust=1,size=2)+
+    scale_color_manual(values = cols.use)+
+    scale_size_continuous(range = c(0,6),limits = c(0,1),name = 'System Fraction',trans = 'sqrt') +
+    theme_classic() +
+    Seurat::NoAxes() +
     #Seurat::NoLegend() +
-    xlim(-1.1,1.1)+
-    ylim(-1.1,1.1)+
-    ggplot2::ggtitle(title)
+    xlim(-1.1,1.1) +
+    ylim(-1.1,1.1) +
+    ggplot2::ggtitle(title) +
+    theme(plot.title = element_text(face = "bold", size = 14, hjust = 0.5))
 
   circuit.plot
-
   # return output
   return(circuit.plot)
 }
