@@ -3,7 +3,7 @@
 #' @param transcr.obj A transcriptomic object
 #' @param connect.obj A connectomic object, ideally paired with / derived from the transcriptomic object.
 #' @param feature A connectomic feature (signaling mechanism), with and 'em dash' ("—") as separator
-#' @param plot.function The base function to use. Currentyl only option is 'ggCircuit', which is a custom sub-function in NICHESMethods, based on trigonometry + ggplot2. May also be able to build an iGraph-based version in the future.
+#' @param plot.function The base function to use. Currently only option is 'ggCircuit', which is a custom sub-function in NICHESMethods, based on trigonometry + ggplot2. May also be able to build an iGraph-based version in the future.
 #' @param group.by Character string. Name of the grouping variable to use. Must be in the metadata of the transcriptomic object.
 #' @param graph.angle The orientation angle of the whole CircuitPlot graph, rotational.
 #' @param h Arrow start and end offset from node center (the amount the arrows are shortened on center.)
@@ -19,10 +19,10 @@
 #' @param max.edge.value Default NULL. The maximum represented value for connectivity strength. Allows user-defined global scale for multi-plot comparisons. ### MSBR may want to update how we handle this, may want to generalize better.
 #' @return A circuit plot (ggplot object if plot.function == 'ggCircuit')
 
-CircuitPlot <- function(transcr.obj,
+CircuitPlot_quadratic <- function(transcr.obj,
                         connect.obj,
                         feature,
-                        plot.function = 'ggCircuit',
+                        plot.function = 'ggCircuit_quadratic',
                         group.by = 'CellClass',
                         graph.angle = 45,
                         h = 0.2,
@@ -55,14 +55,14 @@ CircuitPlot <- function(transcr.obj,
                                       group.by = group.by.edge)
 
   # Adding in an edge-aggregate scaling feature for more pronounced/specific signals to be highlighted (SEE, 12/03/2024)
-  if (!is.null(edge.aggregate$feature.value)) {
-    edge.aggregate$feature.value <- scale(edge.aggregate$feature.value, center = TRUE, scale = TRUE)
-    edge.aggregate$feature.value <- scales::rescale(edge.aggregate$feature.value, to = c(0, 1))
-  }
+  # if (!is.null(edge.aggregate$feature.value)) {
+  #   edge.aggregate$feature.value <- scale(edge.aggregate$feature.value, center = TRUE, scale = TRUE)
+  #   edge.aggregate$feature.value <- scales::rescale(edge.aggregate$feature.value, to = c(0, max.edge.value))
+  #  }
 
   # Plot with desired plot.function
-  if (plot.function == 'ggCircuit') {
-    circuit.plot <- ggCircuit(node.aggregate = node.aggregate,
+  if (plot.function == 'ggCircuit_quadratic') {
+    circuit.plot <- ggCircuit_quadratic(node.aggregate = node.aggregate,
                               edge.aggregate = edge.aggregate,
                               graph.angle = graph.angle,
                               h = h,

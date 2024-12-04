@@ -19,7 +19,7 @@ CircuitPlot(
   arrow.head.length = 0.03,
   autocrine.arrow.curvature = 8,
   cols.use = RColorBrewer::brewer.pal(4, "Set2"),
-  edge.fixed.size = T,
+  edge.fixed.size = TRUE,
   global.node.list = c("Endothelium", "Epithelium", "Mesenchyme", "Immune"),
   min.edge.value = 0,
   max.edge.value = NULL,
