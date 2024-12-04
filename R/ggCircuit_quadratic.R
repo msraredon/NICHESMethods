@@ -111,7 +111,7 @@ ggCircuit_quadratic <- function(edge.aggregate,
                aes(size = ifelse(system.fraction == 0, NA, system.fraction),
                    color = node.label)) +
     scale_color_manual(values = cols.use) +
-    scale_size_continuous(range = c(0, 10), limits = c(0, 1), name = "System Fraction") +
+    scale_size_continuous(range = c(0, 8), limits = c(0, 1), name = "System Fraction") +
     theme_classic() +
     Seurat::NoAxes() +
     xlim(-1.1, 1.1) +
