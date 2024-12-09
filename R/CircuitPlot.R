@@ -55,10 +55,10 @@ CircuitPlot <- function(transcr.obj,
                                       group.by = group.by.edge)
 
   # Adding in an edge-aggregate scaling feature for more pronounced/specific signals to be highlighted (SEE, 12/03/2024)
- # if (!is.null(edge.aggregate$feature.value)) {
- #   edge.aggregate$feature.value <- scale(edge.aggregate$feature.value, center = TRUE, scale = TRUE)
- #   edge.aggregate$feature.value <- scales::rescale(edge.aggregate$feature.value, to = c(0, max.edge.value))
-#  }
+ if (!is.null(edge.aggregate$feature.value)) {
+ edge.aggregate$feature.value <- scale(edge.aggregate$feature.value, center = TRUE, scale = TRUE)
+ edge.aggregate$feature.value <- scales::rescale(edge.aggregate$feature.value, to = c(0, 5))
+}
 
   # Plot with desired plot.function
   if (plot.function == 'ggCircuit') {
