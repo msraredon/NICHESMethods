@@ -13,3 +13,5 @@ setwd("/Users/msbr/GitHub/NICHESMethods")
 getwd() # confirm that in the right place
 load_all() # load local package
 check() # check that it works
+
+# this is a demo for tracking commit structure 2024-12-09
