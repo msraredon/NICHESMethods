@@ -11,6 +11,7 @@
 #' @param autocrine.offset #### MSBR not clear yet what this does, or if it is optimal approach
 #' @param edge.scale.factor #### Bigger makes arrows thinner, only if edge.fixed.size == F #### Need to polish our approach to edge thickness.
 #' @param arrow.head.angle Angle of the arrow head segments relative to arrow path
+#' @param arrow.head.length Length of the arrow head lines
 #' @param autocrine.arrow.curvature #### MSBR unclear how this operates, in need of polish to approach here
 #' @param cols.use Named color palette / character vector. Colors to use for the nodes.
 #' @param edge.fixed.size Default TRUE. Whether to fixe edge thickness, or have be proportional to connectivity strength, along with alpha.

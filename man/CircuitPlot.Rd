@@ -51,6 +51,8 @@ CircuitPlot(
 
 \item{arrow.head.angle}{Angle of the arrow head segments relative to arrow path}
 
+\item{arrow.head.length}{Length of the arrow head lines}
+
 \item{autocrine.arrow.curvature}{\subsection{MSBR unclear how this operates, in need of polish to approach here}{
 }}
 

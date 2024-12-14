@@ -16,8 +16,8 @@ load_all() # load local package
 check() # check that it works
 
 # sophie's data
-load("/Volumes/Home/RaredonLab-CC1126-MEDANE/Raredon_Lab_Personal_Folders/Sophie/Single Cell/Single Cell Samples - Nuoya Collaboration/BAMC/BAMC.CTC.integrated.Robj")
-load("/Volumes/Home/RaredonLab-CC1126-MEDANE/Raredon_Lab_Personal_Folders/Sophie/Single Cell/Single Cell Samples - Nuoya Collaboration/BAMC/BAMC.integrated_NAs.Robj")
+load("/Volumes/RaredonLab-CC1126-MEDANE/Raredon_Lab_Personal_Folders/Sophie/Single Cell/Single Cell Samples - Nuoya Collaboration/BAMC/BAMC.CTC.integrated.Robj")
+load("/Volumes/RaredonLab-CC1126-MEDANE/Raredon_Lab_Personal_Folders/Sophie/Single Cell/Single Cell Samples - Nuoya Collaboration/BAMC/BAMC.integrated_NAs.Robj")
 
 
 
@@ -84,3 +84,59 @@ CircuitPlot(transcr.obj = lung.combined,
             autocrine.arrow.curvature = 10,
             cols.use = ,
             edge.fixed = T)
+
+## Network Plot
+
+NetworkPlot(transcriptome.object = BAMC.integrated,
+            connectome.object = BAMC.CTC.integrated,
+            mechanism.of.interest = 'Il24—Il22ra1',
+            reduction = 'umap.rpca',
+            legends.to.plot = NULL)
+
+NetworkPlot(transcriptome.object = BAMC.integrated,
+            connectome.object = BAMC.CTC.integrated,
+            mechanism.of.interest = 'Gpha2—Tshr',
+            reduction = 'umap.rpca',
+            legends.to.plot = NULL)
+
+NetworkPlot(transcriptome.object = BAMC.integrated,
+            connectome.object = BAMC.CTC.integrated,
+            mechanism.of.interest = 'Fgf9—Fgfr3',
+            reduction = 'umap.rpca',
+            legends.to.plot = NULL)
+
+NetworkPlot(transcriptome.object = BAMC.integrated,
+            connectome.object = BAMC.CTC.integrated,
+            mechanism.of.interest = 'Vegfa—Kdr',
+            reduction = 'umap.rpca',
+            legends.to.plot = NULL)
+
+NetworkPlot(transcriptome.object = BAMC.integrated,
+            connectome.object = BAMC.CTC.integrated,
+            mechanism.of.interest = 'Tgfb1—Tgfbr1',
+            reduction = 'umap.rpca',
+            legends.to.plot = NULL)
+require(Seurat)
+
+split.tra <- SplitObject(BAMC.integrated,split.by = 'orig.ident')
+split.ctc <- SplitObject(BAMC.CTC.integrated,split.by = 'orig.ident.Joint')
+
+load_all()
+FOI <- 'Tgfb1—Tgfbr1'
+p1 <- NetworkPlot(transcriptome.object = split.tra[[1]],
+            connectome.object = split.ctc[[1]],
+            mechanism.of.interest = FOI,
+            reduction = 'umap.rpca',
+            legends.to.plot = NULL)+xlim(-10,15)+ylim(-15,12)
+p2 <- NetworkPlot(transcriptome.object = split.tra[[2]],
+                  connectome.object = split.ctc[[2]],
+                  mechanism.of.interest = FOI,
+                  reduction = 'umap.rpca',
+                  legends.to.plot = NULL)+xlim(-10,15)+ylim(-15,12)
+p3 <- NetworkPlot(transcriptome.object = split.tra[[3]],
+                  connectome.object = split.ctc[[3]],
+                  mechanism.of.interest = FOI,
+                  reduction = 'umap.rpca',
+                  legends.to.plot = NULL)+xlim(-10,15)+ylim(-15,12)
+cowplot::plot_grid(p1,p2,p3)
+
