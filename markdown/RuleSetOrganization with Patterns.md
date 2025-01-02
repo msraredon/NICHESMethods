@@ -54,7 +54,7 @@ Date Last Modified: 2024-12-26
 ##### '^S100'
 #### Cathelicidin
 ##### '^CAMP'
-#### Lactoferrin
+#### Lactotransferrin
 ##### '^LTF'
 #### Annexins
 ##### '^ANXA'
@@ -125,11 +125,8 @@ Date Last Modified: 2024-12-26
 ### Calcium Homeostasis
 #### Calcitonin
 ##### '^CALCA|^CALCB'
-#### Calmodulins
-##### '^CALM'
 #### Calreticulin
 ##### '^CALR'
-
 ### Metabolic Homeostasis
 #### Growth Hormone
 ##### '^GH1$|^GH2$|^GHRH$'
@@ -147,10 +144,8 @@ Date Last Modified: 2024-12-26
 ### Lipid Homeostasis
 #### Adiponectin
 ##### '^ADIPOQ'
-#### Apolipoproteins
-##### '^APO'
 #### Lipoproteins
-##### '^LPL'
+##### '^LPL|^APO'
 
 ### Cardiovascular & Osmotic Homeostasis
 #### Adrenomedullin
@@ -275,7 +270,7 @@ Date Last Modified: 2024-12-26
 #### Transferrins
 ##### '^TF$'
 #### Coagulation Factors
-##### '^VWF|^F2$|^F10$|^F12$|^F8$|^F7$|^F9$'
+##### '^VWF|^F2$|^F10$|^F12$|^F8$|^F7$|^F9$|^FGA'
 ### Miscellaneous/Uncategorized
 #### LYPD3
 ##### '^LYPD3$'
@@ -361,7 +356,7 @@ Date Last Modified: 2024-12-26
 #### Cingulin
 ##### '^CGN'
 #### Scaffold Proteins
-##### ^SHANK1$
+##### '^SHANK1$'
 #### Keratin-associated
 ##### '^KRTAP4'
 ### Intracellular (Signaling)

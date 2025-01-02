@@ -49,7 +49,7 @@ RuleSetFunction <- function(query.set = NULL, # A vector of mechanisms, consisti
 }
 
 # test
-ncomms8866.use <- NICHES::ncomms8866[NICHES::ncomms8866$Pair.Evidence %in% c('literature supported','putative'),]
+ncomms8866.use <- NICHES::ncomms8866[NICHES::ncomms8866$Pair.Evidence %in% c('literature supported'),]
 output <- RuleSetFunction(query.set = ncomms8866.use$Pair.Name,
                           ligand.name = ncomms8866.use$Ligand.Name,
                           receptor.name = ncomms8866.use$Receptor.Name)
@@ -57,6 +57,7 @@ to.do <- output[output$DEFINITION.LEVEL==0,]
 
 View(to.do)
 View(output)
+View(ncomms8866.use)
 
 # explore
 table(output$LIGAND.CLASS)
