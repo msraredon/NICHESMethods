@@ -18,6 +18,8 @@ Date Last Modified: 2024-12-31
 ##### '^XCR'
 #### Colony Stimulating Factor (CSF) Family Receptors
 ##### '^CSF'
+#### Prokineticin Family Receptors
+##### '^PROKR'
 
 ### Interferon Family Receptors
 #### IFN Family Receptors
@@ -46,6 +48,8 @@ Date Last Modified: 2024-12-31
 ##### '^CD40'
 #### BTLA
 ##### '^VTCN|^CD79A'
+#### B-Cell Antigen Receptor Complex (BCR)
+##### '^CD19$'
 
 ### Pattern Recognition Receptors
 #### Toll-Like Receptors
@@ -87,15 +91,15 @@ Date Last Modified: 2024-12-31
 #### Platelet Derived Growth Factor (PDGF) Family Receptor
 ##### '^PDGF'
 #### Placental Growth Factor (PGF Family)
-##### 
+##### NA
 #### Transforming Growth Factor Beta (TGFB) Family Receptor
 ##### '^TGFBR'
 #### Vascular Endothelial Growth Factor (VEGF Family)
-##### 
+##### '^KDR$|^FLT'
 #### Angiopoietin (ANGPT) Family Receptor
 ##### '^TIE|^TEK'
 #### Brain-derived Neurotrophic Factor (BDNF Family)
-#####
+##### NA
 #### Bone Morphogenetic Protein (BMP) Family Receptor
 ##### '^BMPR'
 #### Apelin
@@ -103,9 +107,9 @@ Date Last Modified: 2024-12-31
 #### Ciliary Neurotrophic factor
 ##### '^CNTFR'
 #### Growth Differentiation Factors (GDF Family)
-##### 
+##### NA
 #### Stem Cell Factor (KITLG) Receptor
-##### 
+##### '^KIT$'
 #### Glial cell line-derived neurotrophic factors (GDNF) Family Receptor
 ##### '^RET|^GFR'
 
@@ -142,30 +146,30 @@ Date Last Modified: 2024-12-31
   feature.metadata[indices.temp,]$RECEPTOR.FAMILY <- 'Glucagon-like peptide receptor'
 ### Calcium Homeostasis
 #### Calcitonin Family Receptor
-##### '^CALCR'
+##### '^CALCR|^RAMP'
 #### Calreticulin
-#####
+##### NA
 
 ### Metabolic Homeostasis
 #### Growth Hormone Family Receptor
 ##### '^GHR'
 #### Ghrelin
-##### 
+##### NA
 #### Pancreatic Polypeptide
-##### 
+##### NA
 #### "Insulin-like"
-##### 
+##### NA
 #### Somatostatin
-##### 
+##### ^'SSTR'
 #### Agouti-signaling protein
-##### 
+##### '^ATRN$'
 
 ### Lipid Homeostasis
 #### Adiponectin Family Receptor
 ##### '^ADIPOR'
 
 #### Lipoprotein Family Receptor
-##### 'LDL'
+##### '^LDL|^LRP'
 
 ### Cardiovascular & Osmotic Homeostasis
 #### Adrenomedullin Family Receptor
@@ -188,16 +192,20 @@ Date Last Modified: 2024-12-31
 ### Reproductive Homeostasis
 #### Oxytocin Receptor
 ##### '^OXTR'
-#### Sex Hormone Binding Protein
-##### 
-#### Human chorionic gonadotropin (hCG)
-##### 
+#### Sex Hormone Binding Protein Receptors
+##### NA
+#### Gonadotropin Family Receptors
+##### '^FSH|^LHCGR'
 
 ### Stress Homeostasis
 #### Urocortin
-##### 
+##### '^CRHR'
 #### CRH
-##### 
+##### NA
+
+### Opiod System
+#### Opiod System Receptors
+##### '^OPR'
 
 %%%%%%%%%%
 
@@ -277,25 +285,26 @@ Date Last Modified: 2024-12-31
 
 ### Protease Inhibition
 #### Serpins
-##### 
+##### NA
 #### Globulins
-##### 
+##### NA
 #### Tissue inhibitors of metalloproteinases (TIMPs)
-##### 
+##### '^CD63$'
+
 ### Circulatory Factors
 #### Kinin-Kallikrein System
-##### 
+##### '^BDKRB'
 #### Complement Molecules
-##### 
+##### '^CR1$|^C3AR|^C5AR|^CD97'
 #### Transferrins
-##### 
+##### '^TFR'
 #### Coagulation Factors
-##### 
+##### '^GP1BA$|^F3$|^F2|^ASGR2$'
 ### Miscellaneous/Uncategorized
 #### LYPD3
-##### 
+##### NA
 #### Secretory Proteins
-##### 
+##### NA
 
   
 %%%%%%%%%%
@@ -340,35 +349,32 @@ Date Last Modified: 2024-12-31
 
 ### Central Melanocortin System
 #### Agouti-Related Peptide
-##### 
+##### NA
 #### NPY
-##### 
+##### '^NPY'
 #### POMC
-##### 
+##### '^MC1|^MC2|^MC3|^MC4|^MC5|'
 ### Neuropeptide, Unsorted
-  ## Neuropeptide Receptor
-  indices.temp <- grep(pattern = '^NPFFR',
-                       x = feature.metadata$RECEPTOR,
-                       ignore.case = FALSE)
-  feature.metadata[indices.temp,]$RECEPTOR.FAMILY <- 'Neuropeptide Receptor'
+#### Neuropeptide Receptor
+##### '^NPFFR|^GALR''
 #### Pro-melanin stimulating hormone (PMCH)
-##### 
+##### '^MCHR'
 #### Orexin (HCRT)
-##### 
+##### ^'HCRT'
 #### Neurotensin (NTS)
-##### 
+##### '^NTSR'
 #### Neuromedins
-##### 
+##### '^NM'
 #### NPW
-##### 
+##### NA
 #### NPB 
-##### 
+##### '^NPBW'
 #### CNTF
-##### 
+##### '^CNTFR$'
 #### Cortistatin
-##### 
+##### NA
 #### Tachykinin
-##### 
+##### '^TACR'
 
 ## Pleiotrophic Receptors
 ### Transmembrane Glycoproteins
@@ -381,143 +387,33 @@ Date Last Modified: 2024-12-31
 
 ### Intracellular (Structural)
 #### Afadin
-##### 
+##### NA
 #### Vimentin
-##### 
+##### NA
 #### Cingulin
-##### 
+##### NA
 #### Scaffold Proteins
-##### 
+##### NA
 #### Keratin-associated
-##### 
+##### NA 
 ### Intracellular (Signaling)
 #### G Protein Complex Molecules
-##### 
+##### NA
 #### LDL-receptor-related protein-associated protein (LRPAP)
-##### 
+##### NA 
 #### Phosphatidylinositol-glycan biosynthesis class F protein (PIGF)
-##### 
+##### NA 
 #### Heat-shock Proteins
-#####
+##### NA
 #### GTPase Signaling
-##### 
+##### NA 
 ### Intracellular (Enzymes)
 #### Tryptophan Hydroxylase
-##### 
+##### NA 
 #### Enzyme, Unsorted
-##### 
+##### NA 
 ### Intracellular (Uncategorized)
 #### Intracellular (Uncategorized)
-##### 
+##### NA 
 
 %%%%%%%%%%%%%%%%%%
-
-
-DefineReceptorFamily <- function(feature.metadata){
-  ###### RECEPTOR.FAMILY ######
-
-
-  ## Asialoglycoprotein receptor
-  indices.temp <- grep(pattern = '^ASGR',
-                       x = feature.metadata$RECEPTOR,
-                       ignore.case = FALSE)
-  feature.metadata[indices.temp,]$RECEPTOR.FAMILY <- 'Asialoglycoprotein receptor'
-
-
-  ## Prokineticin family receptor
-  indices.temp <- grep(pattern = '^PROK',
-                       x = feature.metadata$RECEPTOR,
-                       ignore.case = FALSE)
-  feature.metadata[indices.temp,]$RECEPTOR.FAMILY <- 'Prokineticin family receptor'
-  ## Guanylate cyclase
-  indices.temp <- grep(pattern = '^GUCY',
-                       x = feature.metadata$RECEPTOR,
-                       ignore.case = FALSE)
-  feature.metadata[indices.temp,]$RECEPTOR.FAMILY <- 'Guanylate cyclase'
-
-  ## TAM Family Kinase
-  indices.temp <- grep(pattern = '^AXL$|^MERTK$|^TYRO3$',
-                       x = feature.metadata$RECEPTOR,
-                       ignore.case = FALSE)
-  feature.metadata[indices.temp,]$RECEPTOR.FAMILY <- 'TAM Family Kinase'
-  ## Formyl peptide receptor
-  indices.temp <- grep(pattern = '^FPR',
-                       x = feature.metadata$RECEPTOR,
-                       ignore.case = FALSE)
-  feature.metadata[indices.temp,]$RECEPTOR.FAMILY <- 'Formyl peptide receptor'
-  ## RAMP
-  indices.temp <- grep(pattern = '^RAMP',
-                       x = feature.metadata$RECEPTOR,
-                       ignore.case = FALSE)
-  feature.metadata[indices.temp,]$RECEPTOR.FAMILY <- 'RAMP'
-
-
-  ## ABC Transporter
-  indices.temp <- grep(pattern = '^ABC',
-                       x = feature.metadata$RECEPTOR,
-                       ignore.case = FALSE)
-  feature.metadata[indices.temp,]$RECEPTOR.FAMILY <- 'ABC Transporter'
-
-  ## Neuropeptide Receptor
-  indices.temp <- grep(pattern = '^NPY|^GALR',
-                       x = feature.metadata$RECEPTOR,
-                       ignore.case = FALSE)
-  feature.metadata[indices.temp,]$RECEPTOR.FAMILY <- 'NPY'
-  
-  ## Solute Carrier Family
-  indices.temp <- grep(pattern = '^SLC',
-                       x = feature.metadata$RECEPTOR,
-                       ignore.case = FALSE)
-  feature.metadata[indices.temp,]$RECEPTOR.FAMILY <- 'Solute Carrier Family'
-
-
-  ## Opiod Receptor Subunit
-  indices.temp <- grep(pattern = '^OPR',
-                       x = feature.metadata$RECEPTOR,
-                       ignore.case = FALSE)
-  feature.metadata[indices.temp,]$RECEPTOR.FAMILY <- 'Opiod Receptor Subunit'
-
-
-  ## G-Protein Receptor
-  indices.temp <- grep(pattern = '^GPR',
-                       x = feature.metadata$RECEPTOR,
-                       ignore.case = FALSE)
-  feature.metadata[indices.temp,]$RECEPTOR.FAMILY <- 'G-Protein Receptor'
-
-
-  ## LRP Family
-  indices.temp <- grep(pattern = '^LRP',
-                       x = feature.metadata$RECEPTOR,
-                       ignore.case = FALSE)
-  feature.metadata[indices.temp,]$RECEPTOR.FAMILY <- 'LRP Family'
-  ## Insulin Receptor
-  indices.temp <- grep(pattern = '^INSR',
-                       x = feature.metadata$RECEPTOR,
-                       ignore.case = FALSE)
-  feature.metadata[indices.temp,]$RECEPTOR.FAMILY <- 'Insulin Receptor'
-
-
-
-  ## Syndecan
-  indices.temp <- grep(pattern = '^SDC',
-                       x = feature.metadata$RECEPTOR,
-                       ignore.case = FALSE)
-  feature.metadata[indices.temp,]$RECEPTOR.FAMILY <- 'Syndecan'
-
-
-
-
-  ## Collagen
-  indices.temp <- grep(pattern = '^COL',
-                       x = feature.metadata$RECEPTOR,
-                       ignore.case = FALSE)
-  feature.metadata[indices.temp,]$RECEPTOR.FAMILY <- 'Collagen'
-
-
-
-  ## Activin
-  indices.temp <- grep(pattern = '^ACVR',
-                       x = feature.metadata$RECEPTOR,
-                       ignore.case = FALSE)
-  feature.metadata[indices.temp,]$RECEPTOR.FAMILY <- 'Activin'
-
