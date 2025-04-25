@@ -23,6 +23,7 @@ CircuitPlot(
   global.node.list = c("Endothelium", "Epithelium", "Mesenchyme", "Immune"),
   min.edge.value = 0,
   max.edge.value = NULL,
+  unity.normalize = F,
   ...
 )
 }
@@ -65,6 +66,8 @@ CircuitPlot(
 \item{min.edge.value}{Default 0. The minimum represented value for connectivity strength.}
 
 \item{max.edge.value}{Default NULL. The maximum represented value for connectivity strength. Allows user-defined global scale for multi-plot comparisons. ### MSBR may want to update how we handle this, may want to generalize better.}
+
+\item{unity.normalize}{If TRUE, will scale edge values (centered) and unity-normalize so that the numbers range from 0 to 1. If FALSE, no change is made, and the numbers represented by the edge weight in the graph are the raw aggregated connectivity values between nodes. The graph will look the same in both cases; this only influences the actual numbers being represented.}
 }
 \value{
 A circuit plot (ggplot object if plot.function == 'ggCircuit')
