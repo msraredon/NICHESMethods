@@ -18,6 +18,8 @@ Date Last Modified: 2024-12-26
 ##### '^XCL1$|^XCL2$'
 #### Colony Stimulating Factors (CSF Family)
 ##### '^CSF'
+#### Prokineticins
+##### '^PROK'
 
 ### Interferons
 #### IFN Family
@@ -134,8 +136,8 @@ Date Last Modified: 2024-12-26
 ##### '^GHRL$'
 #### Pancreatic Polypeptide
 ##### '^PPY$'
-#### "Insulin-like"
-##### '^INSL'
+#### Insulin Family
+##### '^INSL|^INS'
 #### Somatostatin
 ##### '^SST'
 #### Agouti-signaling protein
@@ -170,14 +172,18 @@ Date Last Modified: 2024-12-26
 ##### '^OXT'
 #### Sex Hormone Binding Protein
 ##### '^SHBG'
-#### Human chorionic gonadotropin (hCG)
-##### '^CGA|^CGB'
+#### Gonadotropins
+##### '^CGA|^CGB|^FSH'
 
 ### Stress Homeostasis
 #### Urocortin
 ##### '^UCN'
 #### CRH
 ##### '^CRH'
+
+### Opiod System
+#### Opiod System Ligands
+##### '^PDYN|^PNOC'
 
 %%%%%%%%%%
 
@@ -329,6 +335,8 @@ Date Last Modified: 2024-12-26
 ##### '^PMCH$'
 #### Orexin (HCRT)
 ##### '^HCRT$'
+#### Galanins
+##### '^GAL'
 #### Neurotensin (NTS)
 ##### '^NTS$'
 #### Neuromedins
