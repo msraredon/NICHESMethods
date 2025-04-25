@@ -18,6 +18,7 @@
 #' @param global.node.list A list of nodes to layout within the graph. Useful for placing dummy nodes for cross-system comparison.
 #' @param min.edge.value Default 0. The minimum represented value for connectivity strength.
 #' @param max.edge.value Default NULL. The maximum represented value for connectivity strength. Allows user-defined global scale for multi-plot comparisons. ### MSBR may want to update how we handle this, may want to generalize better.
+#' @param unity.normalize If TRUE, will scale edge values (centered) and unity-normalize so that the numbers range from 0 to 1. If FALSE, no change is made, and the numbers represented by the edge weight in the graph are the raw aggregated connectivity values between nodes. The graph will look the same in both cases; this only influences the actual numbers being represented.
 #' @return A circuit plot (ggplot object if plot.function == 'ggCircuit')
 
 CircuitPlot <- function(transcr.obj,
@@ -38,6 +39,7 @@ CircuitPlot <- function(transcr.obj,
                         global.node.list = c('Endothelium', 'Epithelium', 'Mesenchyme', 'Immune'),
                         min.edge.value = 0,
                         max.edge.value = NULL,
+                        unity.normalize = F,
                         ...) {
   # Define Objects
   ligand <- strsplit(feature, split = "—")[[1]][1]
@@ -55,11 +57,11 @@ CircuitPlot <- function(transcr.obj,
   edge.aggregate <- AggregateEdgeData(edge.object = edge.object,
                                       group.by = group.by.edge)
 
-#   # Adding in an edge-aggregate scaling feature for more pronounced/specific signals to be highlighted (SEE, 12/03/2024)
-#  if (!is.null(edge.aggregate$feature.value)) {
-#  edge.aggregate$feature.value <- scale(edge.aggregate$feature.value, center = TRUE, scale = TRUE)
-#  edge.aggregate$feature.value <- scales::rescale(edge.aggregate$feature.value, to = c(0, 5))
-# }
+  # Adding in an edge-aggregate scaling feature for more pronounced/specific signals to be highlighted (SEE, 12/03/2024)
+ if (unity.normalize == T) {
+ edge.aggregate$feature.value <- scale(edge.aggregate$feature.value, center = TRUE, scale = TRUE)
+ edge.aggregate$feature.value <- scales::rescale(edge.aggregate$feature.value, to = c(0, 1))
+}
 
   # Plot with desired plot.function
   if (plot.function == 'ggCircuit') {
