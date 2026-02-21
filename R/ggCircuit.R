@@ -326,7 +326,6 @@ ggCircuit <- function(edge.aggregate,
                        y = y.start.offset,
                        xend = x.end.offset,
                        yend = y.end.offset,
-                       # size = feature.value/edge.scale.factor
                        alpha = feature.value),
                    size = edge.fixed.size,
                    arrow = grid::arrow(angle = arrow.head.angle, # how 'fat' the arrowheads are
